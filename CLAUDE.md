@@ -8,15 +8,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Arcade Vault — plataforma para jugar online y competir por puntuación. Actualmente el repo es el scaffold inicial de Next.js (solo `app/layout.tsx` + `app/page.tsx`); la funcionalidad de arcade aún no existe.
 
-## Commands
-
-```bash
-npm run dev     # next dev (reescribe el bloque nextjs-agent-rules en AGENTS.md)
-npm run build   # next build
-npm run start   # next start (requiere build previo)
-npm run lint    # eslint (flat config, sin argumentos)
-```
-
 No hay framework de tests configurado. Si se añade uno, documentar aquí cómo ejecutar un test individual.
 
 ## Stack y convenciones
@@ -26,6 +17,10 @@ No hay framework de tests configurado. Si se añade uno, documentar aquí cómo 
 - **Tailwind v4** vía `@tailwindcss/postcss`. Sin `tailwind.config`: los tokens de diseño se declaran en `app/globals.css` con `@theme inline` sobre variables CSS de `:root` (incluye modo oscuro por `prefers-color-scheme`).
 - **Alias de imports:** `@/*` → raíz del proyecto.
 - TypeScript en modo `strict`.
+
+## Skills
+
+Usa siempre /frontend-design para diseñar interfaces de usuario.
 
 ## Flujo de trabajo
 
