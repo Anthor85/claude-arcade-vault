@@ -13,4 +13,13 @@ https://github.com/Klerith/fernando-skills
 
 ```bash
 npx skills@latest add Klerith/fernando-skills
-```# claude-arcade-vault
+```
+
+## Commands
+
+```bash
+npm run dev     # next dev (reescribe el bloque nextjs-agent-rules en AGENTS.md)
+npm run build   # next build
+npm run start   # next start (requiere build previo)
+npm run lint    # eslint (flat config, sin argumentos)
+```
