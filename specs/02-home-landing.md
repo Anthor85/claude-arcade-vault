@@ -1,6 +1,6 @@
 # SPEC 02 — Home: landing en `/` y biblioteca en `/juegos`
 
-> **Estado:** Aprobada
+> **Estado:** Implementada
 > **Depende de:** SPEC 01
 > **Fecha:** 2026-08-19
 > **Objetivo:** Portar la landing de `references/home-about/home.jsx` a la ruta `/` (hero, rail de juegos y CTA final) moviendo la biblioteca actual a `/juegos`, sin tocar el resto de rutas.
