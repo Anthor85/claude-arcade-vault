@@ -47,7 +47,7 @@ export default function NotFound() {
         </div>
 
         <div style={{ textAlign: "center", marginTop: 28 }}>
-          <Link href="/" className="btn lg">
+          <Link href="/juegos" className="btn lg">
             VOLVER AL VAULT
           </Link>
         </div>

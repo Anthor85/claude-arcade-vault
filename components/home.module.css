@@ -1,0 +1,114 @@
+/* Landing (`/`). Portado de references/home-about/styles.css, bloque HOME PAGE.
+   Las utilidades ya existentes en globals.css (btn, pixel, neon-*, blink,
+   pulse, fade-in, cover-*) no se duplican: se usan como clases globales. */
+
+.home { position: relative; }
+
+.homeHero {
+  position: relative;
+  min-height: calc(100vh - 60px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 32px 60px;
+  overflow: hidden;
+}
+.homeHeroInner { position: relative; z-index: 3; text-align: center; max-width: 1100px; }
+.heroEyebrow { font-size: 11px; letter-spacing: 0.24em; margin-bottom: 24px; }
+.homeTitle {
+  margin: 0;
+  font-family: var(--pixel);
+  font-size: clamp(32px, 7vw, 88px);
+  line-height: 1.05;
+  letter-spacing: 0.04em;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.homeTitle .line1 { color: #fff; text-shadow: 0 0 14px rgba(255,255,255,0.4); }
+.homeTitle .line2 {
+  background: linear-gradient(180deg, var(--cyan), #4dd0e1);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 14px rgba(0,245,255,0.45));
+}
+.homeTitle .line3 {
+  background: linear-gradient(180deg, var(--magenta), #ff6b9e);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 14px rgba(255,0,110,0.45));
+}
+.homeSub {
+  margin: 28px auto 36px; max-width: 640px;
+  font-size: 15px; line-height: 1.7; color: var(--ink-dim); letter-spacing: 0.04em;
+}
+.homeCtas { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.heroScroll {
+  position: absolute; left: 50%; bottom: -20px; transform: translateX(-50%);
+  font-family: var(--pixel); font-size: 9px; letter-spacing: 0.2em; color: var(--ink-faint);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.heroScroll .arrow { color: var(--cyan); }
+@media (prefers-reduced-motion: no-preference) {
+  .heroScroll .arrow { animation: bounce 1.6s ease-in-out infinite; }
+}
+@keyframes bounce { 50% { transform: translateY(6px); } }
+
+.homeSilos { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0.55; }
+.homeSilos .silo { position: absolute; filter: drop-shadow(0 0 10px currentColor); image-rendering: pixelated; }
+@media (prefers-reduced-motion: no-preference) {
+  .homeSilos .silo { animation: float 6s ease-in-out infinite; }
+}
+.homeSilos .s1 { top: 14%; left: 8%; width: 80px; color: var(--cyan); }
+.homeSilos .s2 { top: 22%; right: 10%; width: 72px; color: var(--magenta); animation-delay: -1.5s; }
+.homeSilos .s3 { bottom: 18%; left: 12%; width: 88px; color: var(--yellow); animation-delay: -3s; }
+.homeSilos .s4 { bottom: 22%; right: 14%; width: 60px; color: var(--green); animation-delay: -4.5s; }
+.homeSilos .s5 { top: 38%; left: 4%; width: 70px; color: #aa00ff; animation-delay: -2s; }
+.homeSilos .s6 { top: 8%; left: 46%; width: 44px; color: var(--gold); animation-delay: -3.5s; }
+.homeSilos .s7 { bottom: 12%; left: 42%; width: 52px; color: #ff3060; animation-delay: -1s; }
+.homeSilos .s8 { top: 50%; right: 4%; width: 60px; color: #00d4ff; animation-delay: -5s; }
+@keyframes float { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-14px) rotate(2deg); } }
+
+.homeSection { max-width: 1320px; margin: 80px auto; padding: 0 32px; }
+.sectionHead { display: flex; align-items: center; gap: 18px; margin-bottom: 36px; }
+.sectionHead .kicker { font-size: 11px; letter-spacing: 0.22em; }
+.sectionTitle {
+  margin: 0; font-family: var(--pixel);
+  font-size: clamp(18px, 2.8vw, 28px); letter-spacing: 0.06em; color: var(--ink);
+}
+.sectionRule { flex: 1; height: 1px; background: linear-gradient(90deg, var(--line), transparent); }
+
+.miniRail { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1100px) { .miniRail { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 600px) { .miniRail { grid-template-columns: repeat(2, 1fr); } }
+.miniCard {
+  display: block; color: inherit; text-decoration: none;
+  background: var(--bg-2); border: 1px solid var(--line); cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms;
+}
+.miniCard:hover { transform: translateY(-4px); border-color: var(--cyan); }
+.miniCover { position: relative; aspect-ratio: 1 / 1; overflow: hidden; }
+.miniMeta { padding: 10px 12px; }
+.miniTitle { font-family: var(--pixel); font-size: 10px; letter-spacing: 0.06em; }
+.miniCat { font-family: var(--mono); font-size: 10px; color: var(--ink-faint); letter-spacing: 0.14em; margin-top: 4px; }
+
+.railFooter { text-align: center; margin-top: 24px; }
+
+.homeFinal { text-align: center; padding: 100px 32px 120px; max-width: 900px; margin: 0 auto; position: relative; }
+.homeFinal::before, .homeFinal::after {
+  content: ""; position: absolute; left: 50%; transform: translateX(-50%);
+  width: 60%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  opacity: 0.5;
+}
+.homeFinal::before { top: 30px; }
+.homeFinal::after { bottom: 30px; }
+.finalTitle {
+  font-size: clamp(22px, 4vw, 40px); letter-spacing: 0.08em;
+  background: linear-gradient(180deg, #fff, var(--yellow));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 12px rgba(245,255,0,0.4));
+  margin: 0 0 36px;
+}
+/* Gana a `.btn.xl` de globals.css sin depender del orden de las hojas. */
+:global(.btn.xl).finalCta { padding: 24px 44px; font-size: 14px; letter-spacing: 0.2em; }
+.finalTag { margin-top: 28px; color: var(--ink-dim); font-size: 13px; letter-spacing: 0.06em; }
+
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 600ms ease, transform 600ms ease; }
+.reveal.in { opacity: 1; transform: none; }
