@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getGame } from "@/lib/games";
-import { seededScores } from "@/lib/scores";
 
 export default async function GameDetailPage({
   params,
@@ -10,8 +9,8 @@ export default async function GameDetailPage({
   const game = getGame(id);
   if (!game) notFound();
 
-  // Determinista: mismo id → mismas filas, así que puede renderizarse en servidor.
-  const scores = seededScores(id.length * 17 + 3, 10);
+  // TODO(SPEC 04, paso 12): el panel lee la vista hall_of_fame.
+  const scores: { rank: number; name: string; score: number; date: string }[] = [];
 
   return (
     <div className="av-detail fade-in">

@@ -380,6 +380,23 @@ a {
 .av-mobile-panel a.active {
   color: var(--cyan);
 }
+/* Cerrar sesión ocupa el sitio de "Iniciar Sesión" en el panel móvil: es un
+   botón, pero se lee como una entrada más de la lista. */
+.av-mobile-panel .mobile-signout {
+  padding: 14px 12px;
+  font-family: var(--pixel);
+  font-size: 11px;
+  color: var(--magenta);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px dashed var(--line-2);
+  text-align: left;
+  cursor: pointer;
+}
+.av-mobile-panel .mobile-signout:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 .av-mobile-backdrop {
   position: fixed;
   inset: 0;

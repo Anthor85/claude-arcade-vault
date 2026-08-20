@@ -8,6 +8,7 @@ import "./globals.css";
 import { Nav } from "@/components/nav";
 import { SessionProvider } from "@/components/session-provider";
 import { SiteFooter } from "@/components/site-footer";
+import { getSessionUser } from "@/lib/supabase/session";
 
 const pressStart = Press_Start_2P({
   variable: "--font-press-start",
@@ -35,7 +36,11 @@ export const metadata: Metadata = {
   description: "Juega online y compite por la puntuación más alta.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // La sesión se resuelve en servidor para que el nav pinte el nick ya en el
+  // primer paint, en vez de aparecer "Iniciar Sesión" y corregirse después.
+  const user = await getSessionUser();
+
   return (
     <html
       lang="es"
@@ -44,7 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body>
         <div className="av-bg" aria-hidden />
         <div className="av-noise" aria-hidden />
-        <SessionProvider>
+        <SessionProvider initialUser={user}>
           <div className="av-root">
             <Nav />
             <main className="av-main">{children}</main>

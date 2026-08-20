@@ -4,8 +4,6 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useSession } from "@/components/session-provider";
 import { GAMES } from "@/lib/games";
-import { seededScores } from "@/lib/scores";
-import type { SavedScore } from "@/lib/session";
 
 /** Mismo formato que las filas mock: dd/mm/aaaa. */
 function formatDate(at: number): string {
@@ -16,20 +14,15 @@ function formatDate(at: number): string {
 }
 
 export function HallOfFame() {
-  const { user, scoresFor } = useSession();
+  const { user } = useSession();
   const [tab, setTab] = useState(GAMES[0].id);
 
-  const rows = useMemo(() => seededScores(tab.length * 23 + 7, 12), [tab]);
+  // TODO(SPEC 04, paso 12): las filas salen de la vista hall_of_fame.
+  const rows = useMemo<{ rank: number; name: string; score: number; date: string }[]>(() => [], []);
   const game = GAMES.find((g) => g.id === tab);
 
-  // La mejor entrada real de av_scores para este juego; sin ninguna, no hay fila.
-  const best = useMemo(() => {
-    const mine = scoresFor(tab);
-    return mine.reduce<SavedScore | null>(
-      (top, s) => (top === null || s.score > top.score ? s : top),
-      null,
-    );
-  }, [scoresFor, tab]);
+  // TODO(SPEC 04, paso 12): la mejor marca sale de la base de datos.
+  const best = null as { name: string; score: number; at: number } | null;
 
   // Rango real frente a la tabla que se está mostrando.
   const bestRank = best

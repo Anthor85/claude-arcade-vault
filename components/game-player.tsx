@@ -11,7 +11,7 @@ const POINTS_PER_LEVEL = 2500;
 const START_LIVES = 3;
 
 export function GamePlayer({ game }: { game: Game }) {
-  const { user, saveScore } = useSession();
+  const { user } = useSession();
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(START_LIVES);
   const [paused, setPaused] = useState(false);
@@ -25,7 +25,7 @@ export function GamePlayer({ game }: { game: Game }) {
   const over = ended || lives <= 0;
 
   // El nombre del HUD sigue a la sesión, que se hidrata después del primer paint.
-  const playerName = user ? user.name : "INVITADO";
+  const playerName = user ? user.username : "INVITADO";
   const name = typedName ?? playerName;
 
   useEffect(() => {
@@ -158,7 +158,7 @@ export function GamePlayer({ game }: { game: Game }) {
                   type="button"
                   className="btn yellow"
                   onClick={() => {
-                    saveScore({ game: game.id, name, score });
+                    // TODO(SPEC 04, paso 11): guardar con el Server Action.
                     setSaved(true);
                   }}
                 >

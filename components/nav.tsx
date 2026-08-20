@@ -9,6 +9,7 @@ export function Nav() {
   const pathname = usePathname();
   const { user, signOut } = useSession();
   const [open, setOpen] = useState(false);
+  const [leaving, setLeaving] = useState(false);
 
   const isHome = pathname === "/";
   // La biblioteca queda activa también en detalle y reproductor, como el prototipo.
@@ -18,6 +19,16 @@ export function Nav() {
   const isAuth = pathname.startsWith("/acceso");
 
   const close = () => setOpen(false);
+
+  const leave = async () => {
+    setLeaving(true);
+    close();
+    try {
+      await signOut();
+    } finally {
+      setLeaving(false);
+    }
+  };
 
   return (
     <>
@@ -67,9 +78,11 @@ export function Nav() {
           <button
             type="button"
             className="btn ghost auth-btn"
-            onClick={signOut}
+            onClick={leave}
+            disabled={leaving}
+            title="Cerrar sesión"
           >
-            {user.name} ▾
+            {user.username} ▾
           </button>
         ) : (
           <Link href="/acceso" className="btn auth-btn" onClick={close}>
@@ -114,12 +127,31 @@ export function Nav() {
         <Link href="/salon" className={isSalon ? "active" : ""} onClick={close}>
           Salón de la Fama
         </Link>
-        <Link href="/acerca" className={isAbout ? "active" : ""} onClick={close}>
+        <Link
+          href="/acerca"
+          className={isAbout ? "active" : ""}
+          onClick={close}
+        >
           Acerca de
         </Link>
-        <Link href="/acceso" className={isAuth ? "active" : ""} onClick={close}>
-          {user ? "Cuenta" : "Iniciar Sesión"}
-        </Link>
+        {user ? (
+          <button
+            type="button"
+            className="mobile-signout"
+            onClick={leave}
+            disabled={leaving}
+          >
+            Cerrar Sesión ({user.username})
+          </button>
+        ) : (
+          <Link
+            href="/acceso"
+            className={isAuth ? "active" : ""}
+            onClick={close}
+          >
+            Iniciar Sesión
+          </Link>
+        )}
         <div style={{ flex: 1 }} />
         <div
           className="pixel"
