@@ -482,6 +482,22 @@ a {
 .btn.pulse {
   animation: pulse 1.6s ease-in-out infinite;
 }
+/* Deshabilitado: la pieza sigue ahí, apagada y sin responder al puntero.
+   Lo usan el botón mientras se envía un formulario y GOOGLE/GITHUB, que se
+   conservan en la composición aunque todavía no hagan nada. */
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.btn:disabled:hover,
+.btn[aria-disabled="true"]:hover {
+  transform: none;
+  color: var(--ink);
+  box-shadow:
+    0 0 0 transparent,
+    inset 0 0 0 transparent;
+}
 @keyframes pulse {
   0%,
   100% {
@@ -1395,6 +1411,10 @@ a {
   border: 0;
   color: var(--ink-dim);
   cursor: pointer;
+}
+.auth-tabs button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .auth-tabs button.on {
   background: rgba(0, 245, 255, 0.08);
