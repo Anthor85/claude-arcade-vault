@@ -27,10 +27,10 @@ export default function Home() {
           </p>
           <div className={styles.homeCtas}>
             <Link href="/juegos" className="btn xl pulse">
-              ▶  EXPLORAR JUEGOS
+              ▶ EXPLORAR JUEGOS
             </Link>
             <Link href="/acceso" className="btn xl magenta">
-              ✦  CREAR CUENTA
+              ✦ CREAR CUENTA
             </Link>
           </div>
           <div className={styles.heroScroll} aria-hidden="true">

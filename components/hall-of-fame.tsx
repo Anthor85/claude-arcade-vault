@@ -68,7 +68,11 @@ export function HallOfFame() {
         <div className="podium-slot gold">
           <div
             className="pixel"
-            style={{ fontSize: 9, color: "var(--gold)", letterSpacing: "0.18em" }}
+            style={{
+              fontSize: 9,
+              color: "var(--gold)",
+              letterSpacing: "0.18em",
+            }}
           >
             CAMPEÓN
           </div>
@@ -100,7 +104,8 @@ export function HallOfFame() {
           <div
             key={r.rank}
             className={
-              "tr" + (i === 0 ? " top1" : i === 1 ? " top2" : i === 2 ? " top3" : "")
+              "tr" +
+              (i === 0 ? " top1" : i === 1 ? " top2" : i === 2 ? " top3" : "")
             }
             style={{ animationDelay: `${i * 50}ms` }}
           >

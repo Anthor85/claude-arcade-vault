@@ -95,7 +95,11 @@ export function AuthForm() {
             />
           </div>
 
-          <button className="btn lg" type="submit" style={{ width: "100%", marginTop: 8 }}>
+          <button
+            className="btn lg"
+            type="submit"
+            style={{ width: "100%", marginTop: 8 }}
+          >
             {tab === "in" ? "ENTRAR AL VAULT" : "CREAR Y JUGAR"}
           </button>
         </form>

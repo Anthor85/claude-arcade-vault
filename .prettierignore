@@ -1,0 +1,7 @@
+.next
+node_modules
+package-lock.json
+tsconfig.tsbuildinfo
+next-env.d.ts
+# Prototipo UMD (React 18 + Babel en el navegador): no es código del proyecto.
+references/
