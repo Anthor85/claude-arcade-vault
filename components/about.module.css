@@ -1,0 +1,107 @@
+/* Página "Acerca de" (`/acerca`). Portado de references/home-about/styles.css,
+   bloque ABOUT PAGE (líneas 1071-1146). Las utilidades ya existentes en
+   globals.css (btn, pixel, mono, neon-*, blink, fade-in, field) no se duplican:
+   se usan como clases globales y los selectores que las mencionan van en
+   :global(...). Las animaciones van bajo prefers-reduced-motion, como en
+   home.module.css. */
+
+.about { position: relative; }
+
+/* ===== hero ===== */
+.aboutHero { max-width: 1100px; margin: 0 auto; padding: 80px 32px 40px; text-align: center; }
+.aboutHero .kicker { font-size: 11px; letter-spacing: 0.24em; margin-bottom: 18px; }
+.aboutTitle {
+  font-family: var(--pixel); font-size: clamp(26px, 5vw, 52px); letter-spacing: 0.06em; margin: 0;
+  background: linear-gradient(180deg, #fff, var(--cyan) 80%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 14px rgba(0,245,255,0.4));
+}
+.aboutMission { max-width: 720px; margin: 28px auto 0; font-size: 15px; line-height: 1.8; color: var(--ink-dim); letter-spacing: 0.03em; }
+
+.highlightRow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 52px; }
+@media (max-width: 820px) { .highlightRow { grid-template-columns: 1fr; } }
+.highlight {
+  display: flex; align-items: center; gap: 16px;
+  padding: 18px 20px; background: var(--bg-2); border: 1px solid var(--line);
+  text-align: left; transition: transform 220ms, border-color 220ms, box-shadow 220ms;
+}
+.highlight.cyan { color: var(--cyan); }
+.highlight.magenta { color: var(--magenta); }
+.highlight.green { color: var(--green); }
+.highlight:hover { transform: translateY(-3px); border-color: currentColor; box-shadow: 0 12px 28px -14px currentColor; }
+.highlight .hlIcon { width: 36px; height: 36px; flex: none; filter: drop-shadow(0 0 6px currentColor); image-rendering: pixelated; }
+.highlight .hlText { font-size: 10px; letter-spacing: 0.1em; line-height: 1.5; color: var(--ink); text-shadow: none; }
+
+/* ===== banda divisoria ===== */
+.aboutDivider { max-width: 1200px; margin: 60px auto; padding: 0 32px; display: flex; align-items: center; gap: 16px; }
+.divBar { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--magenta), transparent); }
+.divPixels { display: flex; gap: 4px; }
+.divPixels span { width: 6px; height: 6px; background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
+.divPixels span:nth-child(3n) { background: var(--magenta); box-shadow: 0 0 6px var(--magenta); }
+.divPixels span:nth-child(5n) { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+@media (prefers-reduced-motion: no-preference) {
+  .divPixels span { animation: pxblink 2.4s steps(2) infinite; }
+}
+@keyframes pxblink { 50% { opacity: 0.2; } }
+
+/* ===== contacto ===== */
+.aboutContact { max-width: 1200px; margin: 0 auto 80px; padding: 0 32px; }
+.contactGrid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 40px; align-items: start; }
+@media (max-width: 900px) { .contactGrid { grid-template-columns: 1fr; gap: 24px; } }
+.contactIntro .kicker { font-size: 11px; letter-spacing: 0.24em; margin-bottom: 14px; }
+.contactTitle { font-family: var(--pixel); font-size: clamp(22px, 3.5vw, 36px); letter-spacing: 0.06em; margin: 0; color: var(--cyan); text-shadow: 0 0 12px rgba(0,245,255,0.4); }
+.contactSub { color: var(--ink-dim); font-size: 14px; line-height: 1.7; margin: 18px 0 24px; }
+.contactTips { display: flex; flex-direction: column; gap: 10px; }
+.contactTips .tip { display: flex; align-items: center; gap: 10px; font-family: var(--pixel); font-size: 9px; color: var(--ink-dim); letter-spacing: 0.14em; }
+.contactTips .tipLed { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); flex: none; }
+.contactTips .tipLed.y { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+.contactTips .tipLed.m { background: var(--magenta); box-shadow: 0 0 6px var(--magenta); }
+
+/* ===== formulario ===== */
+.contactForm { background: var(--bg-2); border: 1px solid var(--line); padding: 28px; position: relative; transition: transform 80ms; }
+.contactForm::before { content: ""; position: absolute; inset: 4px; border: 1px dashed rgba(0,245,255,0.15); pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .contactForm.shake { animation: shake 0.4s; }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); } 40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); } 80% { transform: translateX(4px); }
+}
+.contactForm textarea {
+  background: var(--bg); border: 1px solid var(--line); padding: 12px; outline: 0;
+  font-family: var(--mono); color: var(--ink); resize: vertical; min-height: 110px;
+  transition: border-color 140ms, box-shadow 140ms; width: 100%;
+}
+.contactForm textarea:focus { border-color: var(--cyan); box-shadow: 0 0 12px rgba(0,245,255,0.35); }
+.contactForm textarea::placeholder, .contactForm input::placeholder { color: var(--ink-faint); }
+
+/* `.btn` y `.press` son globales: solo se matiza el :active dentro del módulo. */
+.contactForm :global(.btn.press):active { transform: translateY(3px) scale(0.99); box-shadow: 0 0 6px rgba(0,245,255,0.2) inset; }
+
+/* Mensaje de error del envío, sobre el botón. No existe en el prototipo. */
+.formError {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--magenta);
+  background: rgba(255,0,110,0.08);
+  color: var(--magenta);
+  font-family: var(--pixel); font-size: 9px; line-height: 1.6; letter-spacing: 0.12em;
+}
+
+/* ===== terminal de éxito ===== */
+.terminalSuccess { background: #000; border: 1px solid var(--green); box-shadow: 0 0 22px rgba(0,255,136,0.25); font-family: var(--mono); overflow: hidden; }
+.termBar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #0a0a0f; border-bottom: 1px solid var(--line); }
+.termBar .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.termBar .dot.r { background: #ff5f56; }
+.termBar .dot.y { background: #ffbd2e; }
+.termBar .dot.g { background: #27c93f; }
+.termBar .termTitle { margin-left: 8px; font-family: var(--pixel); font-size: 9px; color: var(--ink-faint); letter-spacing: 0.14em; }
+.termBody { padding: 18px 18px 22px; font-size: 13px; line-height: 1.8; }
+.termBody .line { color: var(--green); overflow-wrap: anywhere; }
+.termBody .prompt { color: var(--cyan); margin-right: 8px; }
+.termBody .dim { color: var(--ink-dim); }
+.termBody .success { margin-top: 12px; color: var(--green); text-shadow: 0 0 6px rgba(0,255,136,0.45); font-weight: 700; white-space: pre-wrap; }
+@media (prefers-reduced-motion: no-preference) {
+  .termBody .caret { animation: blink 1s steps(1) infinite; }
+}
