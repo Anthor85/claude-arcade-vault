@@ -43,18 +43,18 @@ export type GameCategory = "ARCADE" | "PUZZLE" | "SHOOTER" | "VERSUS";
 export type GameColor = "cyan" | "magenta" | "yellow" | "green";
 
 export type Game = {
-  id: string;        // "bloque-buster"
-  title: string;     // "BLOQUE BUSTER"
-  short: string;     // texto de tarjeta
-  long: string;      // texto de detalle
+  id: string; // "bloque-buster"
+  title: string; // "BLOQUE BUSTER"
+  short: string; // texto de tarjeta
+  long: string; // texto de detalle
   cat: GameCategory;
-  cover: string;     // clase CSS: "cover-bricks"
-  color: GameColor;  // color del botón JUGAR
+  cover: string; // clase CSS: "cover-bricks"
+  color: GameColor; // color del botón JUGAR
   best: number;
-  plays: string;     // "12.4K"
+  plays: string; // "12.4K"
 };
 
-export const GAMES: Game[];           // los 8 juegos de references/data.jsx, sin cambios
+export const GAMES: Game[]; // los 8 juegos de references/data.jsx, sin cambios
 export const CATS: readonly string[]; // ["TODOS", ...GameCategory]
 export function getGame(id: string): Game | undefined;
 ```
@@ -78,12 +78,12 @@ Las semillas se derivan del id igual que en la referencia: detalle `id.length * 
 `lib/session.ts` — cliente, envuelve `localStorage`:
 
 ```ts
-export type User = { name: string };            // "PX_KAI", máx. 10 caracteres
+export type User = { name: string }; // "PX_KAI", máx. 10 caracteres
 export type SavedScore = {
-  game: string;   // Game["id"]
+  game: string; // Game["id"]
   name: string;
   score: number;
-  at: number;     // Date.now()
+  at: number; // Date.now()
 };
 
 // Claves: "av_user" (User | null), "av_scores" (SavedScore[])
@@ -146,13 +146,13 @@ Cada lectura va dentro de `try/catch`: si `localStorage` no está disponible o e
 
 ## Riesgos
 
-| Riesgo | Mitigación |
-| --- | --- |
-| Desajuste de hidratación al leer `localStorage` durante el render | La sesión arranca en `null` y se hidrata en `useEffect`; el nav renderiza el estado de invitado en el primer paint. |
-| `localStorage` bloqueado (modo privado, cookies desactivadas) | Todos los accesos van en `try/catch`; la app funciona sin persistir. |
-| Las clases CSS portadas asumen una estructura DOM concreta | Al portar cada pantalla se respeta el anidamiento exacto del `.jsx` de referencia; cualquier cambio de marcado se verifica contra `references/Arcade Vault.html`. |
-| Next 16 cambia APIs de routing respecto al conocimiento previo | Antes de escribir cada ruta se consulta `node_modules/next/dist/docs/01-app/`, como exige `AGENTS.md`. |
-| Los temporizadores del reproductor siguen vivos al navegar fuera | Cada `setInterval` se limpia en el retorno de su `useEffect`. |
+| Riesgo                                                            | Mitigación                                                                                                                                                        |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Desajuste de hidratación al leer `localStorage` durante el render | La sesión arranca en `null` y se hidrata en `useEffect`; el nav renderiza el estado de invitado en el primer paint.                                               |
+| `localStorage` bloqueado (modo privado, cookies desactivadas)     | Todos los accesos van en `try/catch`; la app funciona sin persistir.                                                                                              |
+| Las clases CSS portadas asumen una estructura DOM concreta        | Al portar cada pantalla se respeta el anidamiento exacto del `.jsx` de referencia; cualquier cambio de marcado se verifica contra `references/Arcade Vault.html`. |
+| Next 16 cambia APIs de routing respecto al conocimiento previo    | Antes de escribir cada ruta se consulta `node_modules/next/dist/docs/01-app/`, como exige `AGENTS.md`.                                                            |
+| Los temporizadores del reproductor siguen vivos al navegar fuera  | Cada `setInterval` se limpia en el retorno de su `useEffect`.                                                                                                     |
 
 ## Lo que **no** entra en esta spec
 

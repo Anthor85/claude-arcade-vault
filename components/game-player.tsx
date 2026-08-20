@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import { useSession } from "@/components/session-provider";
 import type { Game } from "@/lib/games";
 
-const TICK_MS = 220;        // cada cuánto sube el marcador
-const LIFE_MS = 7000;       // cada cuánto se pierde una vida
+const TICK_MS = 220; // cada cuánto sube el marcador
+const LIFE_MS = 7000; // cada cuánto se pierde una vida
 const POINTS_PER_LEVEL = 2500;
 const START_LIVES = 3;
 
@@ -107,7 +107,10 @@ export function GamePlayer({ game }: { game: Game }) {
             <div className="player-ship" />
           </div>
           {paused && !over && (
-            <div className="crt-content" style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}>
+            <div
+              className="crt-content"
+              style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}
+            >
               <div>
                 <div className="pixel neon-yellow" style={{ fontSize: 22 }}>
                   EN PAUSA

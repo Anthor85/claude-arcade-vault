@@ -95,13 +95,20 @@ export function Nav() {
       />
 
       <aside className={"av-mobile-panel" + (open ? " open" : "")}>
-        <div className="pixel neon-cyan" style={{ fontSize: 11, marginBottom: 16 }}>
+        <div
+          className="pixel neon-cyan"
+          style={{ fontSize: 11, marginBottom: 16 }}
+        >
           MENÚ
         </div>
         <Link href="/" className={isHome ? "active" : ""} onClick={close}>
           Inicio
         </Link>
-        <Link href="/juegos" className={isLibrary ? "active" : ""} onClick={close}>
+        <Link
+          href="/juegos"
+          className={isLibrary ? "active" : ""}
+          onClick={close}
+        >
           Biblioteca
         </Link>
         <Link href="/salon" className={isSalon ? "active" : ""} onClick={close}>
@@ -116,7 +123,11 @@ export function Nav() {
         <div style={{ flex: 1 }} />
         <div
           className="pixel"
-          style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: "0.16em" }}
+          style={{
+            fontSize: 9,
+            color: "var(--ink-faint)",
+            letterSpacing: "0.16em",
+          }}
         >
           CRÉDITOS · 03
         </div>

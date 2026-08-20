@@ -7,11 +7,16 @@ export function HomeSilhouettes() {
       {/* s1: Invasor */}
       <svg className={`${styles.silo} ${styles.s1}`} viewBox="0 0 40 32">
         <g fill="#00f5ff">
-          <rect x="6" y="4" width="4" height="4" /><rect x="30" y="4" width="4" height="4" />
+          <rect x="6" y="4" width="4" height="4" />
+          <rect x="30" y="4" width="4" height="4" />
           <rect x="2" y="8" width="36" height="4" />
-          <rect x="2" y="12" width="4" height="4" /><rect x="14" y="12" width="4" height="4" /><rect x="22" y="12" width="4" height="4" /><rect x="34" y="12" width="4" height="4" />
+          <rect x="2" y="12" width="4" height="4" />
+          <rect x="14" y="12" width="4" height="4" />
+          <rect x="22" y="12" width="4" height="4" />
+          <rect x="34" y="12" width="4" height="4" />
           <rect x="2" y="16" width="36" height="4" />
-          <rect x="6" y="20" width="4" height="4" /><rect x="30" y="20" width="4" height="4" />
+          <rect x="6" y="20" width="4" height="4" />
+          <rect x="30" y="20" width="4" height="4" />
         </g>
       </svg>
       {/* s2: Fantasma */}
@@ -20,7 +25,10 @@ export function HomeSilhouettes() {
           <rect x="8" y="0" width="16" height="4" />
           <rect x="4" y="4" width="24" height="4" />
           <rect x="0" y="8" width="32" height="12" />
-          <rect x="0" y="20" width="6" height="6" /><rect x="10" y="20" width="4" height="6" /><rect x="18" y="20" width="4" height="6" /><rect x="26" y="20" width="6" height="6" />
+          <rect x="0" y="20" width="6" height="6" />
+          <rect x="10" y="20" width="4" height="6" />
+          <rect x="18" y="20" width="4" height="6" />
+          <rect x="26" y="20" width="6" height="6" />
         </g>
       </svg>
       {/* s3: Nave */}
@@ -28,9 +36,12 @@ export function HomeSilhouettes() {
         <g fill="#f5ff00">
           <rect x="10" y="0" width="12" height="4" />
           <rect x="6" y="4" width="20" height="4" />
-          <rect x="4" y="8" width="6" height="6" /><rect x="22" y="8" width="6" height="6" />
+          <rect x="4" y="8" width="6" height="6" />
+          <rect x="22" y="8" width="6" height="6" />
           <rect x="2" y="14" width="28" height="10" />
-          <rect x="6" y="24" width="4" height="4" /><rect x="14" y="24" width="4" height="4" /><rect x="22" y="24" width="4" height="4" />
+          <rect x="6" y="24" width="4" height="4" />
+          <rect x="14" y="24" width="4" height="4" />
+          <rect x="22" y="24" width="4" height="4" />
         </g>
       </svg>
       {/* s4: Mira */}
@@ -38,7 +49,15 @@ export function HomeSilhouettes() {
         <g fill="#00ff88">
           <rect x="10" y="0" width="4" height="24" />
           <rect x="0" y="10" width="24" height="4" />
-          <rect x="6" y="6" width="12" height="12" fill="none" stroke="#00ff88" strokeWidth="2" />
+          <rect
+            x="6"
+            y="6"
+            width="12"
+            height="12"
+            fill="none"
+            stroke="#00ff88"
+            strokeWidth="2"
+          />
         </g>
       </svg>
       {/* s5: UFO / platillo */}
@@ -48,7 +67,9 @@ export function HomeSilhouettes() {
           <rect x="10" y="6" width="16" height="4" />
           <rect x="4" y="10" width="28" height="4" />
           <rect x="0" y="14" width="36" height="4" />
-          <rect x="6" y="18" width="4" height="2" /><rect x="16" y="18" width="4" height="2" /><rect x="26" y="18" width="4" height="2" />
+          <rect x="6" y="18" width="4" height="2" />
+          <rect x="16" y="18" width="4" height="2" />
+          <rect x="26" y="18" width="4" height="2" />
         </g>
       </svg>
       {/* s6: Moneda */}
@@ -65,8 +86,10 @@ export function HomeSilhouettes() {
       {/* s7: Corazón pixel */}
       <svg className={`${styles.silo} ${styles.s7}`} viewBox="0 0 24 22">
         <g fill="#ff3060">
-          <rect x="2" y="2" width="6" height="2" /><rect x="16" y="2" width="6" height="2" />
-          <rect x="0" y="4" width="10" height="4" /><rect x="14" y="4" width="10" height="4" />
+          <rect x="2" y="2" width="6" height="2" />
+          <rect x="16" y="2" width="6" height="2" />
+          <rect x="0" y="4" width="10" height="4" />
+          <rect x="14" y="4" width="10" height="4" />
           <rect x="0" y="8" width="24" height="4" />
           <rect x="2" y="12" width="20" height="2" />
           <rect x="4" y="14" width="16" height="2" />

@@ -15,13 +15,19 @@ export default function NotFound() {
               <div>
                 <div
                   className="pixel neon-magenta flicker"
-                  style={{ fontSize: "clamp(18px, 5vw, 32px)", letterSpacing: "0.08em" }}
+                  style={{
+                    fontSize: "clamp(18px, 5vw, 32px)",
+                    letterSpacing: "0.08em",
+                  }}
                 >
                   GAME OVER
                 </div>
                 <div
                   className="pixel neon-cyan"
-                  style={{ fontSize: "clamp(32px, 9vw, 64px)", margin: "18px 0 14px" }}
+                  style={{
+                    fontSize: "clamp(32px, 9vw, 64px)",
+                    margin: "18px 0 14px",
+                  }}
                 >
                   404
                 </div>

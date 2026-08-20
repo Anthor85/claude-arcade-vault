@@ -90,13 +90,13 @@ Todos los textos de la landing son literales en el JSX, copiados de `home.jsx`.
 
 ## Riesgos
 
-| Riesgo | Mitigación |
-| --- | --- |
+| Riesgo                                                                                                         | Mitigación                                                                                                                                                                                                      |
+| -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `app/juegos/page.tsx` junto a `app/juegos/[id]/page.tsx`: dudas sobre precedencia de ruta estática vs dinámica | El segmento estático gana; se verifica en el paso 1 que `/juegos` y `/juegos/caida` resuelven a páginas distintas. Ante cualquier duda, consultar `node_modules/next/dist/docs/01-app/` como exige `AGENTS.md`. |
-| Al pasar el CSS a módulo se pierden reglas que dependían de descendencia con clases globales | Cada selector portado se revisa uno a uno contra las líneas 930-1070 de `references/home-about/styles.css`; los que apuntan a clases globales se envuelven en `:global(...)`. |
-| Enlaces internos que aún apuntan a `/` esperando la biblioteca (nav, 404, modal de fin de partida, salón) | Antes de cerrar, `grep` de `href="/"` en `app/` y `components/`: los que signifiquen "ir a la biblioteca" pasan a `/juegos`; los que signifiquen "ir al inicio" se quedan. |
-| El `IntersectionObserver` deja las secciones invisibles si no se dispara (navegador antiguo, JS deshabilitado) | `Reveal` comprueba que `IntersectionObserver` exista; si no, aplica `in` de inmediato. |
-| Las animaciones `float`, `bounce` y `pulse` molestan a usuarios sensibles al movimiento | Envolver las animaciones del módulo en `@media (prefers-reduced-motion: no-preference)`. |
+| Al pasar el CSS a módulo se pierden reglas que dependían de descendencia con clases globales                   | Cada selector portado se revisa uno a uno contra las líneas 930-1070 de `references/home-about/styles.css`; los que apuntan a clases globales se envuelven en `:global(...)`.                                   |
+| Enlaces internos que aún apuntan a `/` esperando la biblioteca (nav, 404, modal de fin de partida, salón)      | Antes de cerrar, `grep` de `href="/"` en `app/` y `components/`: los que signifiquen "ir a la biblioteca" pasan a `/juegos`; los que signifiquen "ir al inicio" se quedan.                                      |
+| El `IntersectionObserver` deja las secciones invisibles si no se dispara (navegador antiguo, JS deshabilitado) | `Reveal` comprueba que `IntersectionObserver` exista; si no, aplica `in` de inmediato.                                                                                                                          |
+| Las animaciones `float`, `bounce` y `pulse` molestan a usuarios sensibles al movimiento                        | Envolver las animaciones del módulo en `@media (prefers-reduced-motion: no-preference)`.                                                                                                                        |
 
 ## Lo que **no** entra en esta spec
 

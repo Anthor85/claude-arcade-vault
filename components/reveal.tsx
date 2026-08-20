@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, type ElementType, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ElementType,
+  type ReactNode,
+} from "react";
 import styles from "@/components/home.module.css";
 
 type RevealProps = {
@@ -14,7 +20,11 @@ type RevealProps = {
  * Envuelve una sección y la hace aparecer con fundido cuando entra en el
  * viewport. Solo se anima una vez: al intersectar deja de observarse.
  */
-export function Reveal({ children, as: Tag = "section", className }: RevealProps) {
+export function Reveal({
+  children,
+  as: Tag = "section",
+  className,
+}: RevealProps) {
   const ref = useRef<HTMLElement>(null);
   const [shown, setShown] = useState(false);
 

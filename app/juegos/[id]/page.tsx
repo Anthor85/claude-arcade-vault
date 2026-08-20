@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { getGame } from "@/lib/games";
 import { seededScores } from "@/lib/scores";
 
-export default async function GameDetailPage({ params }: PageProps<"/juegos/[id]">) {
+export default async function GameDetailPage({
+  params,
+}: PageProps<"/juegos/[id]">) {
   const { id } = await params;
   const game = getGame(id);
   if (!game) notFound();
@@ -35,7 +37,10 @@ export default async function GameDetailPage({ params }: PageProps<"/juegos/[id]
               <div className="l">Mejor global</div>
               <div
                 className="v"
-                style={{ color: "var(--magenta)", textShadow: "0 0 6px rgba(255,0,110,0.5)" }}
+                style={{
+                  color: "var(--magenta)",
+                  textShadow: "0 0 6px rgba(255,0,110,0.5)",
+                }}
               >
                 {game.best.toLocaleString("es-ES")}
               </div>
@@ -44,7 +49,10 @@ export default async function GameDetailPage({ params }: PageProps<"/juegos/[id]
               <div className="l">Dificultad</div>
               <div
                 className="v"
-                style={{ color: "var(--yellow)", textShadow: "0 0 6px rgba(245,255,0,0.5)" }}
+                style={{
+                  color: "var(--yellow)",
+                  textShadow: "0 0 6px rgba(245,255,0,0.5)",
+                }}
               >
                 ★ ★ ★ ☆ ☆
               </div>
@@ -76,7 +84,11 @@ export default async function GameDetailPage({ params }: PageProps<"/juegos/[id]
               <div className="pl">
                 {r.name}
                 <div
-                  style={{ fontSize: 10, color: "var(--ink-faint)", letterSpacing: "0.1em" }}
+                  style={{
+                    fontSize: 10,
+                    color: "var(--ink-faint)",
+                    letterSpacing: "0.1em",
+                  }}
                 >
                   {r.date}
                 </div>

@@ -18,6 +18,11 @@ No hay framework de tests configurado. Si se añade uno, documentar aquí cómo 
 - **Alias de imports:** `@/*` → raíz del proyecto.
 - TypeScript en modo `strict`.
 
+## Formato y lint
+
+- **Prettier** (`npm run format`, `npm run format:check`). Config en `.prettierrc`; `prettier-plugin-tailwindcss` ordena las clases. `eslint-config-prettier` va el último en `eslint.config.mjs` para que ESLint no pelee con el formato.
+- **Hook `PostToolUse`** en `.claude/settings.json`: tras cada Write/Edit sobre `.ts/.tsx/.js/.jsx/.mjs/.cjs/.md/.mdx` corre `.claude/hooks/format-and-lint.mjs`, que pasa Prettier y `eslint --fix`. Los errores que ESLint no puede autofijar se devuelven como contexto; el hook nunca bloquea el turno.
+
 ## Skills
 
 Usa siempre /frontend-design para diseñar interfaces de usuario.

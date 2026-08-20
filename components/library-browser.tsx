@@ -6,7 +6,10 @@ import { CATS, GAMES } from "@/lib/games";
 
 /** Minúsculas y sin diacríticos: buscar "cai" o "glot" encuentra CAÍDA y GLOTÓN. */
 function fold(s: string): string {
-  return s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+  return s
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
 }
 
 export function LibraryBrowser() {
@@ -17,8 +20,7 @@ export function LibraryBrowser() {
     () =>
       GAMES.filter(
         (g) =>
-          (cat === "TODOS" || g.cat === cat) &&
-          fold(g.title).includes(fold(q)),
+          (cat === "TODOS" || g.cat === cat) && fold(g.title).includes(fold(q)),
       ),
     [q, cat],
   );
@@ -64,7 +66,11 @@ export function LibraryBrowser() {
           >
             <div
               className="pixel"
-              style={{ fontSize: 14, color: "var(--magenta)", marginBottom: 12 }}
+              style={{
+                fontSize: 14,
+                color: "var(--magenta)",
+                marginBottom: 12,
+              }}
             >
               NO HAY RESULTADOS
             </div>

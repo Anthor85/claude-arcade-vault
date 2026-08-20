@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
-import { Press_Start_2P, JetBrains_Mono, Courier_Prime } from "next/font/google";
+import {
+  Press_Start_2P,
+  JetBrains_Mono,
+  Courier_Prime,
+} from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/nav";
 import { SessionProvider } from "@/components/session-provider";
