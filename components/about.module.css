@@ -102,6 +102,20 @@
 .termBody .prompt { color: var(--cyan); margin-right: 8px; }
 .termBody .dim { color: var(--ink-dim); }
 .termBody .success { margin-top: 12px; color: var(--green); text-shadow: 0 0 6px rgba(0,255,136,0.45); font-weight: 700; white-space: pre-wrap; }
+/* El `blink` global de globals.css no se puede reusar desde un módulo: el
+   compilador hashea el nombre de la animación y dejaría de resolver. */
 @media (prefers-reduced-motion: no-preference) {
-  .termBody .caret { animation: blink 1s steps(1) infinite; }
+  .termBody .caret { animation: caretBlink 1s steps(1) infinite; }
+}
+@keyframes caretBlink { 50% { opacity: 0; } }
+
+/* Móvil: globals.css ya baja el padding lateral de las demás páginas a 16px en
+   este mismo corte. La página de Acerca de hace lo propio para no comerse
+   64px de los 375 disponibles. */
+@media (max-width: 720px) {
+  .aboutHero { padding: 48px 16px 24px; }
+  .aboutDivider { margin: 40px auto; padding: 0 16px; }
+  .aboutContact { padding: 0 16px; margin-bottom: 48px; }
+  .contactForm { padding: 20px; }
+  .termBody { padding: 14px 14px 18px; font-size: 12px; }
 }
