@@ -15,7 +15,17 @@
  */
 
 /** Acciones que el reproductor puede inyectar desde controles táctiles. */
-export type GameAction = "left" | "right" | "thrust" | "fire";
+export type GameAction =
+  | "left"
+  | "right"
+  | "thrust"
+  | "fire"
+  /** Bajar una fila (soft drop). */
+  | "down"
+  /** Girar la pieza. */
+  | "rotate"
+  /** Soltar de golpe (hard drop). */
+  | "drop";
 
 /** Lo que el motor le cuenta al reproductor mientras se juega. */
 export type GameEvents = {
@@ -50,6 +60,8 @@ export type GameEngine = {
   /** Resolución interna del canvas; el reproductor la escala por CSS. */
   width: number;
   height: number;
+  /** `false` en juegos sin vidas: el reproductor oculta ese campo del HUD. */
+  hasLives: boolean;
   /** Acciones que este juego entiende: con esto se pinta el mando táctil. */
   actions: readonly GameAction[];
   /** Ayuda de teclado que se muestra bajo el marco CRT. */

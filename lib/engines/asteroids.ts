@@ -13,8 +13,12 @@ import type { GameAction, GameEngine, GameEvents, GameHandle } from "./types";
 const W = 800;
 const H = 600;
 
-/** Cada acción táctil escribe en la misma tecla que usaría el teclado. */
-const ACTION_KEYS: Record<GameAction, string> = {
+/**
+ * Cada acción táctil escribe en la misma tecla que usaría el teclado. Solo
+ * cubre las acciones que este juego declara en `actions`; el resto de
+ * `GameAction` pertenece a otros motores.
+ */
+const ACTION_KEYS: Partial<Record<GameAction, string>> = {
   left: "ArrowLeft",
   right: "ArrowRight",
   thrust: "ArrowUp",
@@ -691,6 +695,7 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
     },
     setInput(action, down) {
       const code = ACTION_KEYS[action];
+      if (!code) return;
       if (down) {
         justPressed[code] = !keys[code];
         keys[code] = true;
@@ -711,6 +716,7 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
 export const asteroidsEngine: GameEngine = {
   width: W,
   height: H,
+  hasLives: true,
   actions: ["left", "right", "thrust", "fire"],
   // Solo los controles del juego: la pausa la declara el reproductor, que es
   // quien la escucha.
