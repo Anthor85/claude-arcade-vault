@@ -938,6 +938,8 @@ a {
   position: relative;
   border: 1px solid var(--line);
   overflow: hidden;
+  display: block;
+  unicode-bidi: isolate;
 }
 .detail-info {
   display: flex;
