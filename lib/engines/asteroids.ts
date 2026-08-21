@@ -707,11 +707,12 @@ export const asteroidsEngine: GameEngine = {
   width: W,
   height: H,
   actions: ["left", "right", "thrust", "fire"],
+  // Solo los controles del juego: la pausa la declara el reproductor, que es
+  // quien la escucha.
   controls: [
     { keys: "← →", label: "ROTAR" },
     { keys: "↑", label: "PROPULSAR" },
     { keys: "ESPACIO", label: "DISPARAR" },
-    { keys: "P / ESC", label: "PAUSA" },
   ],
   mount,
 };

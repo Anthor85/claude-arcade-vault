@@ -38,3 +38,82 @@
   letter-spacing: 0.12em;
   color: var(--magenta);
 }
+
+/* ── Bisel del panel de control ──────────────────────────────────────────────
+   Debajo del CRT no va más pantalla: va la plancha donde una máquina real
+   lleva serigrafiada la leyenda de movimientos. De ahí el labio superior
+   iluminado y las teclas en relieve — el único sitio de la página que
+   representa algo que la mano toca. */
+
+.panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+  margin-top: 14px;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--line-2);
+  border-top-color: rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, var(--bg-2), var(--bg));
+}
+
+.panelItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 auto;
+  justify-content: center;
+  padding: 12px 18px;
+  /* Ranura entre leyendas, como el troquelado de la plancha. */
+  border-left: 1px solid var(--line-2);
+}
+
+.panelItem:first-child {
+  border-left: 0;
+}
+
+/* Tecla en relieve: cara más clara que la plancha, luz arriba, sombra abajo. */
+.cap {
+  font-family: var(--pixel);
+  font-size: 11px;
+  line-height: 1;
+  color: var(--cyan);
+  padding: 7px 9px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 2px 0 rgba(0, 0, 0, 0.6);
+  text-shadow: 0 0 6px rgba(0, 245, 255, 0.45);
+  white-space: nowrap;
+}
+
+/* Etiqueta serigrafiada: mismo registro que el resto de rótulos del HUD. */
+.capLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+/* Cian = lo escucha el juego. Amarillo = lo escucha la plataforma. */
+.panelItem.platform .cap {
+  color: var(--yellow);
+  border-color: rgba(245, 255, 0, 0.28);
+  text-shadow: 0 0 6px rgba(245, 255, 0, 0.45);
+}
+
+@media (max-width: 640px) {
+  .panelItem {
+    flex: 1 1 50%;
+    justify-content: flex-start;
+    padding: 10px 14px;
+  }
+  /* En dos columnas la ranura vertical deja de significar nada. */
+  .panelItem:nth-child(odd) {
+    border-left: 0;
+  }
+}
