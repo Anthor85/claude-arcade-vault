@@ -34,6 +34,8 @@ const PAUSE_HINT: GameControlHint = { keys: "P / ESC", label: "PAUSA" };
 type EngineMeta = {
   controls: readonly GameControlHint[];
   actions: readonly GameAction[];
+  /** Si es `false`, el HUD no pinta el campo `Vidas`. */
+  hasLives: boolean;
 };
 
 type PlayerStatus = "loading" | "playing" | "paused" | "over";
@@ -60,6 +62,10 @@ export function GamePlayer({ game }: { game: Game }) {
   const over = status === "over" || (!engine && lives <= 0);
   const paused = status === "paused";
   const level = engine ? engineLevel : mockLevel(score);
+
+  // La maqueta siempre tiene vidas; con motor manda lo que declare el
+  // contrato, y mientras el `import()` está en vuelo no se pinta el campo.
+  const showLives = engine ? (meta?.hasLives ?? false) : true;
 
   // El nombre del HUD sale de la sesión: ya no es un campo escribible.
   const playerName = user ? user.username : "INVITADO";
@@ -152,10 +158,12 @@ export function GamePlayer({ game }: { game: Game }) {
             <div className="l">Puntuación</div>
             <div className="v">{score.toLocaleString("es-ES")}</div>
           </div>
-          <div className="hud-stat lives">
-            <div className="l">Vidas</div>
-            <div className="v">{"♥ ".repeat(lives).trim() || "—"}</div>
-          </div>
+          {showLives && (
+            <div className="hud-stat lives">
+              <div className="l">Vidas</div>
+              <div className="v">{"♥ ".repeat(lives).trim() || "—"}</div>
+            </div>
+          )}
           <div className="hud-stat level">
             <div className="l">Nivel</div>
             <div className="v">{String(level).padStart(2, "0")}</div>
@@ -317,7 +325,11 @@ function CanvasArena({
       const canvas = canvasRef.current;
       if (cancelled || !canvas) return;
       handleRef.current = engine.mount(canvas, events);
-      onReady({ controls: engine.controls, actions: engine.actions });
+      onReady({
+        controls: engine.controls,
+        actions: engine.actions,
+        hasLives: engine.hasLives,
+      });
     });
 
     return () => {
