@@ -1598,12 +1598,19 @@ a {
 .hall-table .th,
 .hall-table .tr {
   display: grid;
-  grid-template-columns: 70px 1fr 1fr 140px;
+  /* minmax(0, …): sin esto la columna del jugador no baja de su ancho mínimo
+     y un nick largo empuja la tabla fuera de la pantalla en móvil. */
+  grid-template-columns: 70px minmax(0, 1fr) minmax(0, 1fr) 140px;
   align-items: center;
   padding: 12px 18px;
   font-family: var(--mono);
   font-size: 13px;
   gap: 10px;
+}
+.hall-table .th > *,
+.hall-table .tr > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .hall-table .th {
   font-family: var(--pixel);
@@ -1677,7 +1684,7 @@ a {
 @media (max-width: 720px) {
   .hall-table .th,
   .hall-table .tr {
-    grid-template-columns: 50px 1fr 90px 90px;
+    grid-template-columns: 50px minmax(0, 1fr) 90px 90px;
     font-size: 12px;
     padding: 10px 12px;
   }
@@ -1760,5 +1767,30 @@ a {
 @keyframes spinpix {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Pantallas estrechas: la tabla del Salón aprieta columnas para que el nick
+   siga siendo legible sin sacar la página de cuadro. */
+@media (max-width: 480px) {
+  .hall-table .th,
+  .hall-table .tr {
+    grid-template-columns: 44px minmax(0, 1fr) 76px 74px;
+    gap: 8px;
+    padding: 10px;
+    font-size: 11px;
+  }
+  .hall-table .th {
+    font-size: 8px;
+    letter-spacing: 0.1em;
+  }
+  .hall-table .tr .rk {
+    font-size: 9px;
+  }
+  .hall-table .tr .sc {
+    font-size: 10px;
+  }
+  .hall-table .tr.you {
+    padding-left: 7px;
   }
 }

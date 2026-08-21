@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getGame } from "@/lib/games";
+import { getHallOfFame } from "@/lib/scores-db";
+import { getSessionUser } from "@/lib/supabase/session";
+import styles from "@/components/hall.module.css";
 
 export default async function GameDetailPage({
   params,
@@ -9,8 +12,9 @@ export default async function GameDetailPage({
   const game = getGame(id);
   if (!game) notFound();
 
-  // TODO(SPEC 04, paso 12): el panel lee la vista hall_of_fame.
-  const scores: { rank: number; name: string; score: number; date: string }[] = [];
+  // Las mejores marcas reales del juego, mismas filas que el Salón.
+  const user = await getSessionUser();
+  const scores = await getHallOfFame(id, user?.id, 10);
 
   return (
     <div className="av-detail fade-in">
@@ -71,6 +75,12 @@ export default async function GameDetailPage({
       <aside>
         <div className="leaderboard">
           <h3>MEJORES PUNTUACIONES</h3>
+          {scores.length === 0 && (
+            <p className={styles.panelEmpty}>
+              NADIE HA MARCADO AÚN EN ESTE JUEGO. LA PRIMERA PARTIDA QUE SE
+              GUARDE ABRE LA TABLA.
+            </p>
+          )}
           {scores.map((r, i) => (
             <div
               key={r.rank}
@@ -81,7 +91,7 @@ export default async function GameDetailPage({
             >
               <div className="rk">#{String(r.rank).padStart(2, "0")}</div>
               <div className="pl">
-                {r.name}
+                {r.username}
                 <div
                   style={{
                     fontSize: 10,

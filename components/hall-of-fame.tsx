@@ -1,33 +1,25 @@
-"use client";
-
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { useSession } from "@/components/session-provider";
+
+import styles from "@/components/hall.module.css";
 import { GAMES } from "@/lib/games";
+import type { HallRow } from "@/lib/scores-db";
 
-/** Mismo formato que las filas mock: dd/mm/aaaa. */
-function formatDate(at: number): string {
-  const d = new Date(at);
-  const day = String(d.getDate()).padStart(2, "0");
-  const mon = String(d.getMonth() + 1).padStart(2, "0");
-  return `${day}/${mon}/${d.getFullYear()}`;
-}
-
-export function HallOfFame() {
-  const { user } = useSession();
-  const [tab, setTab] = useState(GAMES[0].id);
-
-  // TODO(SPEC 04, paso 12): las filas salen de la vista hall_of_fame.
-  const rows = useMemo<{ rank: number; name: string; score: number; date: string }[]>(() => [], []);
-  const game = GAMES.find((g) => g.id === tab);
-
-  // TODO(SPEC 04, paso 12): la mejor marca sale de la base de datos.
-  const best = null as { name: string; score: number; at: number } | null;
-
-  // Rango real frente a la tabla que se está mostrando.
-  const bestRank = best
-    ? rows.filter((r) => r.score > best.score).length + 1
-    : null;
+/**
+ * Salón de la Fama.
+ *
+ * Componente de servidor: las filas llegan ya resueltas desde la base de datos
+ * y las pestañas por juego son enlaces (`/salon?juego=…`), no estado de
+ * cliente, para que cada ranking tenga su propia URL.
+ */
+export function HallOfFame({
+  gameId,
+  rows,
+}: {
+  gameId: string;
+  rows: HallRow[];
+}) {
+  const game = GAMES.find((g) => g.id === gameId);
+  const [first, second, third] = rows;
 
   return (
     <div className="av-hall fade-in">
@@ -40,103 +32,119 @@ export function HallOfFame() {
 
       <div className="hall-tabs">
         {GAMES.map((g) => (
-          <button
+          <Link
             key={g.id}
-            type="button"
-            className={"chip" + (tab === g.id ? " active" : "")}
-            onClick={() => setTab(g.id)}
+            href={`/salon?juego=${g.id}`}
+            scroll={false}
+            className={"chip" + (gameId === g.id ? " active" : "")}
           >
             {g.title}
-          </button>
+          </Link>
         ))}
       </div>
 
-      <div className="podium">
-        <div className="podium-slot silver">
-          <div className="rank-num">02</div>
-          <div className="name">{rows[1].name}</div>
-          <div className="score">{rows[1].score.toLocaleString("es-ES")}</div>
-          <div className="date">{rows[1].date}</div>
+      {rows.length === 0 ? (
+        <div className={styles.empty}>
+          <p className={styles.emptyTitle}>
+            NADIE HA MARCADO AÚN EN ESTE JUEGO
+          </p>
+          <p className={styles.emptyHint}>
+            La primera partida que se guarde abre la tabla.
+          </p>
+          {game && (
+            <Link href={`/juegos/${game.id}`} className="btn lg">
+              ▶&nbsp;&nbsp;JUGAR A {game.title}
+            </Link>
+          )}
         </div>
-        <div className="podium-slot gold">
-          <div
-            className="pixel"
-            style={{
-              fontSize: 9,
-              color: "var(--gold)",
-              letterSpacing: "0.18em",
-            }}
-          >
-            CAMPEÓN
-          </div>
-          <div className="rank-num" style={{ fontSize: 36, marginTop: 4 }}>
-            01
-          </div>
-          <div className="name">{rows[0].name}</div>
-          <div className="score" style={{ fontSize: 20 }}>
-            {rows[0].score.toLocaleString("es-ES")}
-          </div>
-          <div className="date">{rows[0].date}</div>
-        </div>
-        <div className="podium-slot bronze">
-          <div className="rank-num">03</div>
-          <div className="name">{rows[2].name}</div>
-          <div className="score">{rows[2].score.toLocaleString("es-ES")}</div>
-          <div className="date">{rows[2].date}</div>
-        </div>
-      </div>
-
-      <div className="hall-table">
-        <div className="th">
-          <div>RANGO</div>
-          <div>JUGADOR</div>
-          <div>PUNTUACIÓN</div>
-          <div>FECHA</div>
-        </div>
-        {rows.map((r, i) => (
-          <div
-            key={r.rank}
-            className={
-              "tr" +
-              (i === 0 ? " top1" : i === 1 ? " top2" : i === 2 ? " top3" : "")
-            }
-            style={{ animationDelay: `${i * 50}ms` }}
-          >
-            <div className="rk">#{String(r.rank).padStart(2, "0")}</div>
-            <div className="pl">{r.name}</div>
-            <div className="sc">{r.score.toLocaleString("es-ES")}</div>
-            <div className="dt">{r.date}</div>
-          </div>
-        ))}
-        {user && best && (
-          <>
-            <div className="tr you-label">
-              ▸ TU MEJOR MARCA EN {game?.title}
+      ) : (
+        <>
+          <div className="podium">
+            <div className="podium-slot silver">
+              {second ? (
+                <>
+                  <div className="rank-num">02</div>
+                  <div className="name">{second.username}</div>
+                  <div className="score">
+                    {second.score.toLocaleString("es-ES")}
+                  </div>
+                  <div className="date">{second.date}</div>
+                </>
+              ) : (
+                <div className={styles.slotFree}>PUESTO LIBRE</div>
+              )}
             </div>
-            <div
-              className="tr you"
-              style={{ animationDelay: `${rows.length * 50 + 50}ms` }}
-            >
-              <div className="rk" style={{ color: "var(--yellow)" }}>
-                #{String(bestRank).padStart(2, "0")}
-              </div>
-              <div className="pl" style={{ color: "var(--yellow)" }}>
-                {best.name}
-              </div>
+            <div className="podium-slot gold">
               <div
-                className="sc"
+                className="pixel"
                 style={{
-                  color: "var(--yellow)",
-                  textShadow: "0 0 6px rgba(245,255,0,0.5)",
+                  fontSize: 9,
+                  color: "var(--gold)",
+                  letterSpacing: "0.18em",
                 }}
               >
-                {best.score.toLocaleString("es-ES")}
+                CAMPEÓN
               </div>
-              <div className="dt">{formatDate(best.at)}</div>
+              <div className="rank-num" style={{ fontSize: 36, marginTop: 4 }}>
+                01
+              </div>
+              <div className="name">{first.username}</div>
+              <div className="score" style={{ fontSize: 20 }}>
+                {first.score.toLocaleString("es-ES")}
+              </div>
+              <div className="date">{first.date}</div>
             </div>
-          </>
-        )}
-      </div>
+            <div className="podium-slot bronze">
+              {third ? (
+                <>
+                  <div className="rank-num">03</div>
+                  <div className="name">{third.username}</div>
+                  <div className="score">
+                    {third.score.toLocaleString("es-ES")}
+                  </div>
+                  <div className="date">{third.date}</div>
+                </>
+              ) : (
+                <div className={styles.slotFree}>PUESTO LIBRE</div>
+              )}
+            </div>
+          </div>
+
+          <div className="hall-table">
+            <div className="th">
+              <div>RANGO</div>
+              <div>JUGADOR</div>
+              <div>PUNTUACIÓN</div>
+              <div>FECHA</div>
+            </div>
+            {rows.map((r, i) => (
+              <div
+                key={r.rank}
+                className={
+                  "tr" +
+                  (i === 0
+                    ? " top1"
+                    : i === 1
+                      ? " top2"
+                      : i === 2
+                        ? " top3"
+                        : "") +
+                  (r.isMine ? " you" : "")
+                }
+                style={{ animationDelay: `${i * 50}ms` }}
+              >
+                <div className="rk">#{String(r.rank).padStart(2, "0")}</div>
+                <div className="pl">
+                  {r.username}
+                  {r.isMine && <span className={styles.youTag}> · TÚ</span>}
+                </div>
+                <div className="sc">{r.score.toLocaleString("es-ES")}</div>
+                <div className="dt">{r.date}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       <div style={{ textAlign: "center", marginTop: 32 }}>
         <Link href="/juegos" className="btn lg">

@@ -1,8 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useSession } from "@/components/session-provider";
+import styles from "@/components/player.module.css";
+import {
+  saveScore,
+  type SaveScoreState,
+} from "@/app/juegos/[id]/jugar/actions";
 import type { Game } from "@/lib/games";
 
 const TICK_MS = 220; // cada cuánto sube el marcador
@@ -16,17 +21,15 @@ export function GamePlayer({ game }: { game: Game }) {
   const [lives, setLives] = useState(START_LIVES);
   const [paused, setPaused] = useState(false);
   const [ended, setEnded] = useState(false);
-  // null = todavía sigue al nombre de la sesión; en cuanto se teclea, manda lo tecleado.
-  const [typedName, setTypedName] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
+  /** Cambia en cada partida: reinicia el bloque de guardado. */
+  const [run, setRun] = useState(0);
 
   // Derivados: no necesitan estado propio ni efectos que los sincronicen.
   const level = Math.floor(score / POINTS_PER_LEVEL) + 1;
   const over = ended || lives <= 0;
 
-  // El nombre del HUD sigue a la sesión, que se hidrata después del primer paint.
+  // El nombre del HUD sale de la sesión: ya no es un campo escribible.
   const playerName = user ? user.username : "INVITADO";
-  const name = typedName ?? playerName;
 
   useEffect(() => {
     if (over || paused) return;
@@ -44,11 +47,11 @@ export function GamePlayer({ game }: { game: Game }) {
   }, [over, paused]);
 
   const restart = () => {
+    setRun((r) => r + 1);
     setScore(0);
     setLives(START_LIVES);
     setPaused(false);
     setEnded(false);
-    setSaved(false);
   };
 
   return (
@@ -143,30 +146,18 @@ export function GamePlayer({ game }: { game: Game }) {
             <h2>FIN DEL JUEGO</h2>
             <div className="final-label">PUNTUACIÓN FINAL</div>
             <div className="final">{score.toLocaleString("es-ES")}</div>
-            {!saved ? (
-              <div className="input-row">
-                <input
-                  value={name}
-                  onChange={(e) =>
-                    setTypedName(e.target.value.toUpperCase().slice(0, 10))
-                  }
-                  placeholder="TUS INICIALES"
-                  maxLength={10}
-                  aria-label="Nombre para la tabla de puntuaciones"
-                />
-                <button
-                  type="button"
-                  className="btn yellow"
-                  onClick={() => {
-                    // TODO(SPEC 04, paso 11): guardar con el Server Action.
-                    setSaved(true);
-                  }}
-                >
-                  GUARDAR PUNTUACIÓN
-                </button>
-              </div>
+            {user ? (
+              // `key`: cada partida estrena su propio estado de guardado.
+              <SaveScore key={run} gameId={game.id} score={score} />
             ) : (
-              <div className="toast-saved">▸ PUNTUACIÓN GUARDADA_</div>
+              // Sin cuenta se juega, pero no se compite: la marca no tendría a
+              // quién atribuirse.
+              <div className={styles.guestNotice}>
+                <p>ENTRA PARA INSCRIBIR TU MARCA EN EL SALÓN DE LA FAMA.</p>
+                <Link href="/acceso" className="btn yellow">
+                  INICIAR SESIÓN
+                </Link>
+              </div>
             )}
             <div className="actions">
               <button type="button" className="btn" onClick={restart}>
@@ -180,5 +171,39 @@ export function GamePlayer({ game }: { game: Game }) {
         </div>
       )}
     </div>
+  );
+}
+
+/** Botón de guardar de la pantalla final, con su propio estado de envío. */
+function SaveScore({ gameId, score }: { gameId: string; score: number }) {
+  const [state, action, pending] = useActionState<SaveScoreState, FormData>(
+    saveScore,
+    { status: "idle" },
+  );
+
+  if (state.status === "ok") {
+    return <div className="toast-saved">▸ PUNTUACIÓN GUARDADA_</div>;
+  }
+
+  return (
+    <>
+      <form action={action} className={styles.saveRow}>
+        <input type="hidden" name="gameId" value={gameId} />
+        <input type="hidden" name="score" value={score} />
+        <button type="submit" className="btn yellow" disabled={pending}>
+          {pending ? "▶ GUARDANDO…" : "GUARDAR PUNTUACIÓN"}
+        </button>
+      </form>
+      {state.status === "unauthenticated" && (
+        <p role="alert" className={styles.saveError}>
+          LA SESIÓN HA CADUCADO. VUELVE A ENTRAR PARA GUARDAR.
+        </p>
+      )}
+      {state.status === "error" && (
+        <p role="alert" className={styles.saveError}>
+          {state.message}
+        </p>
+      )}
+    </>
   );
 }
