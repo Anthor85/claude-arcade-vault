@@ -1,0 +1,14 @@
+/* Mensaje de error del acceso, sobre el botón de enviar.
+   Mismo tratamiento que el error del formulario de contacto (SPEC 03): borde y
+   texto en magenta sobre un fondo apenas teñido. */
+.formError {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--magenta);
+  background: rgba(255, 0, 110, 0.08);
+  color: var(--magenta);
+  font-family: var(--pixel);
+  font-size: 9px;
+  line-height: 1.6;
+  letter-spacing: 0.12em;
+}

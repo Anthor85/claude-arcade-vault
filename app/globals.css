@@ -380,6 +380,23 @@ a {
 .av-mobile-panel a.active {
   color: var(--cyan);
 }
+/* Cerrar sesión ocupa el sitio de "Iniciar Sesión" en el panel móvil: es un
+   botón, pero se lee como una entrada más de la lista. */
+.av-mobile-panel .mobile-signout {
+  padding: 14px 12px;
+  font-family: var(--pixel);
+  font-size: 11px;
+  color: var(--magenta);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px dashed var(--line-2);
+  text-align: left;
+  cursor: pointer;
+}
+.av-mobile-panel .mobile-signout:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 .av-mobile-backdrop {
   position: fixed;
   inset: 0;
@@ -481,6 +498,22 @@ a {
 }
 .btn.pulse {
   animation: pulse 1.6s ease-in-out infinite;
+}
+/* Deshabilitado: la pieza sigue ahí, apagada y sin responder al puntero.
+   Lo usan el botón mientras se envía un formulario y GOOGLE/GITHUB, que se
+   conservan en la composición aunque todavía no hagan nada. */
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.btn:disabled:hover,
+.btn[aria-disabled="true"]:hover {
+  transform: none;
+  color: var(--ink);
+  box-shadow:
+    0 0 0 transparent,
+    inset 0 0 0 transparent;
 }
 @keyframes pulse {
   0%,
@@ -1396,6 +1429,10 @@ a {
   color: var(--ink-dim);
   cursor: pointer;
 }
+.auth-tabs button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 .auth-tabs button.on {
   background: rgba(0, 245, 255, 0.08);
   color: var(--cyan);
@@ -1561,12 +1598,19 @@ a {
 .hall-table .th,
 .hall-table .tr {
   display: grid;
-  grid-template-columns: 70px 1fr 1fr 140px;
+  /* minmax(0, …): sin esto la columna del jugador no baja de su ancho mínimo
+     y un nick largo empuja la tabla fuera de la pantalla en móvil. */
+  grid-template-columns: 70px minmax(0, 1fr) minmax(0, 1fr) 140px;
   align-items: center;
   padding: 12px 18px;
   font-family: var(--mono);
   font-size: 13px;
   gap: 10px;
+}
+.hall-table .th > *,
+.hall-table .tr > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .hall-table .th {
   font-family: var(--pixel);
@@ -1640,7 +1684,7 @@ a {
 @media (max-width: 720px) {
   .hall-table .th,
   .hall-table .tr {
-    grid-template-columns: 50px 1fr 90px 90px;
+    grid-template-columns: 50px minmax(0, 1fr) 90px 90px;
     font-size: 12px;
     padding: 10px 12px;
   }
@@ -1723,5 +1767,30 @@ a {
 @keyframes spinpix {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Pantallas estrechas: la tabla del Salón aprieta columnas para que el nick
+   siga siendo legible sin sacar la página de cuadro. */
+@media (max-width: 480px) {
+  .hall-table .th,
+  .hall-table .tr {
+    grid-template-columns: 44px minmax(0, 1fr) 76px 74px;
+    gap: 8px;
+    padding: 10px;
+    font-size: 11px;
+  }
+  .hall-table .th {
+    font-size: 8px;
+    letter-spacing: 0.1em;
+  }
+  .hall-table .tr .rk {
+    font-size: 9px;
+  }
+  .hall-table .tr .sc {
+    font-size: 10px;
+  }
+  .hall-table .tr.you {
+    padding-left: 7px;
   }
 }

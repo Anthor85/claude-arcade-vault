@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -8,68 +9,66 @@ import {
   useMemo,
   useState,
 } from "react";
-import {
-  clearUser,
-  normalizeName,
-  readScores,
-  readUser,
-  writeScores,
-  writeUser,
-  type SavedScore,
-  type User,
-} from "@/lib/session";
+
+import { createClient } from "@/lib/supabase/client";
+
+/** El jugador tal y como lo necesita la interfaz: identidad y nick. */
+export type SessionUser = { id: string; username: string };
 
 type SessionValue = {
-  user: User | null;
-  signIn: (name: string) => User;
-  signOut: () => void;
-  saveScore: (entry: { game: string; name: string; score: number }) => void;
-  scoresFor: (gameId: string) => SavedScore[];
+  user: SessionUser | null;
+  signOut: () => Promise<void>;
 };
 
 const SessionContext = createContext<SessionValue | null>(null);
 
-export function SessionProvider({ children }: { children: React.ReactNode }) {
-  // Arranca en null en servidor y en el primer paint: se hidrata en el efecto.
-  const [user, setUser] = useState<User | null>(null);
-  const [scores, setScores] = useState<SavedScore[]>([]);
+/**
+ * Reparte la sesión al árbol de cliente.
+ *
+ * El usuario llega ya resuelto desde el servidor (`app/layout.tsx`), así que el
+ * primer paint pinta el nick: no hay parpadeo de "no logueado" al recargar. El
+ * efecto solo escucha cambios posteriores —entrar o salir en otra pestaña—.
+ */
+export function SessionProvider({
+  initialUser,
+  children,
+}: {
+  initialUser: SessionUser | null;
+  children: React.ReactNode;
+}) {
+  const router = useRouter();
+  const [user, setUser] = useState<SessionUser | null>(initialUser);
+
+  // Si el servidor cambia de opinión (navegación, revalidación), manda él.
+  useEffect(() => {
+    setUser(initialUser);
+  }, [initialUser]);
 
   useEffect(() => {
-    setUser(readUser());
-    setScores(readScores());
-  }, []);
+    const supabase = createClient();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      // El nick vive en profiles, no en el token: en vez de consultarlo aquí
+      // se le pide al servidor que vuelva a renderizar con la sesión nueva.
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+        router.refresh();
+      }
+    });
 
-  const signIn = useCallback((name: string) => {
-    const next: User = { name: normalizeName(name) };
-    setUser(next);
-    writeUser(next);
-    return next;
-  }, []);
+    return () => subscription.unsubscribe();
+  }, [router]);
 
-  const signOut = useCallback(() => {
+  const signOut = useCallback(async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
     setUser(null);
-    clearUser();
-  }, []);
-
-  const saveScore = useCallback(
-    (entry: { game: string; name: string; score: number }) => {
-      const row: SavedScore = { ...entry, at: Date.now() };
-      // Relee de localStorage por si otra pestaña escribió mientras tanto.
-      const next = [...readScores(), row];
-      setScores(next);
-      writeScores(next);
-    },
-    [],
-  );
-
-  const scoresFor = useCallback(
-    (gameId: string) => scores.filter((s) => s.game === gameId),
-    [scores],
-  );
+    router.refresh();
+  }, [router]);
 
   const value = useMemo<SessionValue>(
-    () => ({ user, signIn, signOut, saveScore, scoresFor }),
-    [user, signIn, signOut, saveScore, scoresFor],
+    () => ({ user, signOut }),
+    [user, signOut],
   );
 
   return (
