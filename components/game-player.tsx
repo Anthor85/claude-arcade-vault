@@ -7,6 +7,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type PointerEvent as ReactPointerEvent,
   type RefObject,
 } from "react";
 import { useSession } from "@/components/session-provider";
@@ -18,6 +19,7 @@ import {
 import type { Game } from "@/lib/games";
 import { hasEngine, loadEngine } from "@/lib/engines";
 import type {
+  GameAction,
   GameControlHint,
   GameEvents,
   GameHandle,
@@ -27,6 +29,12 @@ const START_LIVES = 3;
 
 /** La pausa es de la plataforma, no del juego: la declara el reproductor. */
 const PAUSE_HINT: GameControlHint = { keys: "P / ESC", label: "PAUSA" };
+
+/** Lo que el reproductor necesita saber del motor para pintar sus controles. */
+type EngineMeta = {
+  controls: readonly GameControlHint[];
+  actions: readonly GameAction[];
+};
 
 type PlayerStatus = "loading" | "playing" | "paused" | "over";
 
@@ -43,8 +51,8 @@ export function GamePlayer({ game }: { game: Game }) {
   );
   /** Cambia en cada partida: reinicia el bloque de guardado. */
   const [run, setRun] = useState(0);
-  /** Ayuda de teclado que declara el motor, ya cargado. */
-  const [controls, setControls] = useState<readonly GameControlHint[]>([]);
+  /** Lo que el motor declara de sí mismo, una vez cargado. */
+  const [meta, setMeta] = useState<EngineMeta | null>(null);
 
   /** Mando a distancia del motor mientras el juego vive. */
   const handleRef = useRef<GameHandle | null>(null);
@@ -61,12 +69,17 @@ export function GamePlayer({ game }: { game: Game }) {
     setStatus("over");
   }, []);
 
-  const handleReady = useCallback((hints: readonly GameControlHint[]) => {
+  const handleReady = useCallback((engineMeta: EngineMeta) => {
     // Si el motor termina de cargar con la pestaña en segundo plano, la partida
     // no empieza a correr sin que nadie la mire.
     const hidden = document.hidden;
-    setControls(hints);
+    setMeta(engineMeta);
     setStatus((s) => (s === "loading" ? (hidden ? "paused" : "playing") : s));
+  }, []);
+
+  /** Los controles táctiles escriben en el mismo mapa de teclas del motor. */
+  const setInput = useCallback((action: GameAction, down: boolean) => {
+    handleRef.current?.setInput(action, down);
   }, []);
 
   const restart = () => {
@@ -190,6 +203,9 @@ export function GamePlayer({ game }: { game: Game }) {
               onLives={setLives}
             />
           )}
+          {meta && status === "playing" && (
+            <TouchPad actions={meta.actions} onInput={setInput} />
+          )}
           {status === "loading" && (
             <div className="crt-content" style={{ zIndex: 5 }}>
               <div className="pixel neon-cyan" style={{ fontSize: 16 }}>
@@ -228,7 +244,7 @@ export function GamePlayer({ game }: { game: Game }) {
         </div>
       </div>
 
-      {controls.length > 0 && <ControlPanel controls={controls} />}
+      {meta && <ControlPanel controls={meta.controls} />}
 
       {over && (
         <div className="modal-bd">
@@ -273,7 +289,7 @@ type CanvasArenaProps = {
   onLives: (lives: number) => void;
   onLevel: (level: number) => void;
   onGameOver: (finalScore: number) => void;
-  onReady: (controls: readonly GameControlHint[]) => void;
+  onReady: (meta: EngineMeta) => void;
 };
 
 function CanvasArena({
@@ -301,7 +317,7 @@ function CanvasArena({
       const canvas = canvasRef.current;
       if (cancelled || !canvas) return;
       handleRef.current = engine.mount(canvas, events);
-      onReady(engine.controls);
+      onReady({ controls: engine.controls, actions: engine.actions });
     });
 
     return () => {
@@ -312,6 +328,66 @@ function CanvasArena({
   }, [gameId, handleRef, onScore, onLives, onLevel, onGameOver, onReady]);
 
   return <canvas ref={canvasRef} className="game-canvas" />;
+}
+
+// ── Mando táctil ──────────────────────────────────────────────────────────────
+
+/** Glifo y nombre accesible de cada acción del contrato. */
+const ACTION_FACE: Record<GameAction, { glyph: string; label: string }> = {
+  left: { glyph: "◀", label: "Girar a la izquierda" },
+  right: { glyph: "▶", label: "Girar a la derecha" },
+  thrust: { glyph: "▲", label: "Propulsar" },
+  fire: { glyph: "●", label: "Disparar" },
+};
+
+/** Dirección a la izquierda, acción a la derecha: reparto de máquina real. */
+const STEERING: readonly GameAction[] = ["left", "right"];
+
+type TouchPadProps = {
+  actions: readonly GameAction[];
+  onInput: (action: GameAction, down: boolean) => void;
+};
+
+/**
+ * Mando superpuesto al canvas para dispositivos de puntero grueso. Cada botón
+ * mantiene su acción mientras el dedo esté encima; `setInput` escribe en el
+ * mismo mapa de teclas que el teclado, así que no hay un segundo camino de
+ * input que probar.
+ */
+function TouchPad({ actions, onInput }: TouchPadProps) {
+  const renderButton = (action: GameAction) => {
+    const face = ACTION_FACE[action];
+    const press = (down: boolean) => (e: ReactPointerEvent) => {
+      // Sin esto el navegador roba el gesto para desplazar o seleccionar.
+      e.preventDefault();
+      onInput(action, down);
+    };
+    return (
+      <button
+        key={action}
+        type="button"
+        aria-label={face.label}
+        className={`${styles.touchBtn} ${action === "fire" ? styles.touchFire : ""}`}
+        onPointerDown={press(true)}
+        onPointerUp={press(false)}
+        onPointerCancel={press(false)}
+        onPointerLeave={press(false)}
+        onContextMenu={(e) => e.preventDefault()}
+      >
+        {face.glyph}
+      </button>
+    );
+  };
+
+  const steering = actions.filter((a) => STEERING.includes(a));
+  const acting = actions.filter((a) => !STEERING.includes(a));
+
+  return (
+    <div className={styles.touchPad}>
+      <div className={styles.touchGroup}>{steering.map(renderButton)}</div>
+      <div className={styles.touchGroup}>{acting.map(renderButton)}</div>
+    </div>
+  );
 }
 
 // ── Bisel del panel de control ────────────────────────────────────────────────
