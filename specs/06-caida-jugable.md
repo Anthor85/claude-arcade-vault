@@ -1,6 +1,6 @@
 # SPEC 06 — Caída jugable: Tetris sobre el contrato de motores
 
-> **Estado:** Aceptado
+> **Estado:** Implementado
 > **Depende de:** SPEC 05
 > **Fecha:** 2026-08-21
 > **Objetivo:** Portar el núcleo clásico del Tetris de `references/started-games/03-claude-tetris` a un motor TypeScript montable desde React, ampliando el contrato `GameEngine` con las acciones y el HUD que un puzzle necesita, de modo que `/juegos/caida/jugar` sea una partida real.
@@ -27,11 +27,11 @@ Y a diferencia de Asteroides, este juego **no encaja en el contrato**: necesita 
 
 - **Motor `lib/engines/tetris.ts`** con el núcleo clásico del original: tablero 10×20, las 7 piezas, rotación horaria con wall kicks, colisión, ghost piece, soft drop, hard drop, puntuación `[0,100,300,500,800] × nivel`, nivel cada 10 líneas, aceleración de caída y fin de partida por colisión al aparecer.
 - **Pieza siguiente dentro del canvas principal**: resolución interna 420×600 (tablero de 300×600 más una columna lateral de 120 px).
-- **Ampliación de `GameAction`** en `lib/engines/types.ts` con `down`, `rotate` y `drop`, y sus entradas en `ACTION_FACE` de `components/game-player.tsx`.
+- **Ampliación de `GameAction`** en `lib/engines/types.ts` con `down`, `rotate` y `drop`, y sus entradas en `ACTION_FACE` de `components/game-player.tsx`. El motor de Tetris declara solo las cuatro primeras: ver `ACTION_KEYS`.
 - **Campo `Vidas` opcional en el HUD**: el contrato declara si el juego tiene vidas y el reproductor **no pinta el campo** cuando no las tiene.
 - **Registro** de `caida → lib/engines/tetris.ts` en `lib/engines/index.ts`, con `import()` diferido.
 - **Reutilización de la ficha `caida`** tal cual: mismo `id`, mismos textos, misma portada `.cover-tetro`. Sin migración SQL.
-- Ayuda de teclado bajo el marco CRT con los cinco controles del juego.
+- Ayuda de teclado bajo el marco CRT con los controles del juego.
 
 **Fuera (otra spec si llega):**
 
@@ -84,12 +84,12 @@ export type GameEngine = {
 
 ### Cambios en el reproductor — `components/game-player.tsx`
 
-| Punto              | Cambio                                                                                                                                                     |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ACTION_FACE`      | Tres entradas nuevas: `down` (`▼`, «Bajar»), `rotate` (`⟳`, «Rotar»), `drop` (`⤓`, «Caída instantánea»)                                                    |
-| `STEERING`         | Pasa a `["left", "right", "down"]`: la columna direccional del mando agrupa las tres, y `rotate` y `drop` caen en el grupo de acción                       |
-| `EngineMeta`       | Lleva también `hasLives`, que sale del motor en `onReady`                                                                                                  |
-| HUD, campo `Vidas` | Se pinta solo si el juego tiene vidas: en la rama de maqueta siempre, y con motor cuando `meta.hasLives`. Mientras el `import()` está en vuelo no se pinta |
+| Punto              | Cambio                                                                                                                                                                                        |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ACTION_FACE`      | Tres entradas nuevas: `down` (`▼`, «Bajar»), `rotate` (`⟳`, «Rotar»), `drop` (`⤓`, «Caída instantánea»). `drop` queda declarado en el contrato aunque este motor no lo use: ver `ACTION_KEYS` |
+| `STEERING`         | Pasa a `["left", "right", "down"]`: la columna direccional del mando agrupa las tres, y `rotate` y `drop` caen en el grupo de acción                                                          |
+| `EngineMeta`       | Lleva también `hasLives`, que sale del motor en `onReady`                                                                                                                                     |
+| HUD, campo `Vidas` | Se pinta solo si el juego tiene vidas: en la rama de maqueta siempre, y con motor cuando `meta.hasLives`. Mientras el `import()` está en vuelo no se pinta                                    |
 
 Nada más del reproductor cambia: `MockArena`, la pausa por `P` / `Escape` / `visibilitychange`, el modal de fin de partida, `saveScore` y el aviso para invitados funcionan igual.
 
@@ -122,7 +122,7 @@ export const tetrisEngine: GameEngine = {
   width: 420, // 300 de tablero + 120 de columna lateral
   height: 600,
   hasLives: false,
-  actions: ["left", "right", "down", "rotate", "drop"],
+  actions: ["left", "right", "down", "rotate"],
   controls: [/* ←→ mover · ↓ bajar · ↑/X rotar · Espacio soltar */],
   mount(canvas, events) {
     /* … */
@@ -130,7 +130,7 @@ export const tetrisEngine: GameEngine = {
 };
 ```
 
-`ACTION_KEYS` traduce cada acción táctil a la **misma tecla** que usaría el teclado (`left`→`ArrowLeft`, `right`→`ArrowRight`, `down`→`ArrowDown`, `rotate`→`ArrowUp`, `drop`→`Space`), así que `setInput` no abre un segundo camino de input. Las cinco acciones son de flanco: se ejecutan en el `down === true` y el `false` solo limpia el estado.
+`ACTION_KEYS` traduce cada acción táctil a la tecla que usaría el teclado (`left`→`ArrowLeft`, `right`→`ArrowRight`, `rotate`→`ArrowUp`), así que `setInput` no abre un segundo camino de input. **Con una excepción: `down`→`Space`.** Pulsar el botón una vez por celda no es jugable en una pantalla táctil, así que el botón de bajar suelta la pieza de golpe y el motor **no declara `drop`**: el mando tiene cuatro botones, no cinco. El teclado no cambia — `ArrowDown` sigue siendo soft drop y `Space` hard drop. Las cuatro acciones son de flanco: se ejecutan en el `down === true` y el `false` solo limpia el estado.
 
 ## Plan de implementación
 
@@ -167,7 +167,7 @@ export const tetrisEngine: GameEngine = {
 - [ ] Sin sesión, el modal muestra el aviso con enlace a `/acceso` y no inserta nada.
 - [ ] El bundle de `/` y de `/juegos` no incluye el código del motor.
 - [ ] A 375 px de ancho el juego se ve completo, con la columna lateral incluida, sin recortes ni scroll horizontal.
-- [ ] En un dispositivo de puntero grueso aparecen cinco botones táctiles —mover, bajar, rotar y soltar— y todos funcionan; en escritorio no se ven.
+- [ ] En un dispositivo de puntero grueso aparecen cuatro botones táctiles —izquierda, derecha, bajar y rotar— y todos funcionan; el botón de bajar suelta la pieza de golpe. En escritorio no se ven.
 - [ ] Las flechas y el espacio no desplazan la página mientras se juega.
 - [ ] No aparece ningún error de hidratación en la consola.
 - [ ] Los juegos sin motor siguen abriendo su maqueta sin errores, y `/juegos/asteroides/jugar` se juega igual que antes.
@@ -175,6 +175,7 @@ export const tetrisEngine: GameEngine = {
 
 ## Decisiones tomadas y descartadas
 
+- **Sí:** en el mando táctil, el botón `▼` suelta la pieza de golpe (`down`→`Space`) y no hay botón `⤓`. Una celda por pulsación no es jugable con el dedo, y dos botones para caer serían redundantes. El teclado conserva las dos velocidades porque mantener `↓` sí funciona.
 - **Sí:** ampliar `GameAction` con `down`, `rotate` y `drop`. Es el cambio más honesto: cada acción del juego se llama como lo que hace, y el glifo del mando táctil no miente.
 - **No:** reutilizar `thrust` para rotar y `fire` para soltar. No habría hecho falta tocar el contrato, pero un mando de puzzle con `▲` para girar y `●` para soltar es incomprensible, y el soft drop se quedaba sin hueco.
 - **No:** ampliar solo con `down` y `rotate`, dejando el hard drop en `fire`. Media medida: el contrato queda más pequeño pero `fire` sigue significando otra cosa.
