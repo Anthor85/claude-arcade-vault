@@ -1,6 +1,6 @@
 # SPEC 05 — Asteroides jugable: primer juego real en la plataforma
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 01, SPEC 04
 > **Fecha:** 2026-08-21
 > **Objetivo:** Portar el clon de Asteroids de `references/started-games/02-claude-asteroids` a un motor TypeScript montable desde React, y conectarlo al reproductor mediante un contrato `GameEngine` reutilizable, de modo que `/juegos/asteroides/jugar` sea una partida real cuya puntuación se inscribe en el Salón de la Fama.
