@@ -71,7 +71,12 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
   const onKeyDown = (e: KeyboardEvent) => {
     justPressed[e.code] = !keys[e.code];
     keys[e.code] = true;
-    if (SCROLL_KEYS.includes(e.code)) e.preventDefault();
+    // Las flechas y el espacio solo dejan de desplazar la página mientras el
+    // juego tiene el control: en pausa o tras el fin de partida el teclado
+    // vuelve a ser del navegador, que es quien mueve el modal.
+    if (SCROLL_KEYS.includes(e.code) && state !== "gameover" && !paused) {
+      e.preventDefault();
+    }
   };
   const onKeyUp = (e: KeyboardEvent) => {
     keys[e.code] = false;

@@ -62,8 +62,11 @@ export function GamePlayer({ game }: { game: Game }) {
   }, []);
 
   const handleReady = useCallback((hints: readonly GameControlHint[]) => {
+    // Si el motor termina de cargar con la pestaña en segundo plano, la partida
+    // no empieza a correr sin que nadie la mire.
+    const hidden = document.hidden;
     setControls(hints);
-    setStatus((s) => (s === "loading" ? "playing" : s));
+    setStatus((s) => (s === "loading" ? (hidden ? "paused" : "playing") : s));
   }, []);
 
   const restart = () => {
@@ -72,7 +75,55 @@ export function GamePlayer({ game }: { game: Game }) {
     setLives(START_LIVES);
     setEngineLevel(1);
     setStatus("playing");
+    // Partida nueva sobre el mismo canvas: no hace falta desmontar nada.
+    handleRef.current?.restart();
   };
+
+  /** Abandonar a voluntad: el motor emite su marca y el modal la recoge. */
+  const endGame = () => {
+    const handle = handleRef.current;
+    if (handle) handle.end();
+    else setStatus("over");
+  };
+
+  const togglePause = () =>
+    setStatus((s) =>
+      s === "playing" ? "paused" : s === "paused" ? "playing" : s,
+    );
+
+  // El estado del reproductor manda sobre el loop del motor.
+  useEffect(() => {
+    const handle = handleRef.current;
+    if (!handle) return;
+    if (status === "paused") handle.pause();
+    else if (status === "playing") handle.resume();
+  }, [status]);
+
+  // Salir de la pestaña no debe costar vidas: al volver, sigue en pausa.
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.hidden) {
+        setStatus((s) => (s === "playing" ? "paused" : s));
+      }
+    };
+    // `visibilitychange` solo avisa de los cambios: si se entra con la pestaña
+    // ya oculta, hay que mirarlo una vez.
+    onVisibility();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, []);
+
+  // `P` y `Escape` hacen lo mismo que el botón: son de la plataforma, no del
+  // juego, y por eso los escucha el reproductor.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code !== "KeyP" && e.code !== "Escape") return;
+      e.preventDefault();
+      togglePause();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   return (
     <div className="av-player fade-in">
@@ -101,9 +152,7 @@ export function GamePlayer({ game }: { game: Game }) {
           <button
             type="button"
             className="btn yellow"
-            onClick={() =>
-              setStatus((s) => (s === "paused" ? "playing" : "paused"))
-            }
+            onClick={togglePause}
             disabled={over || status === "loading"}
           >
             {paused ? "REANUDAR" : "PAUSA"}
@@ -111,7 +160,7 @@ export function GamePlayer({ game }: { game: Game }) {
           <button
             type="button"
             className="btn magenta"
-            onClick={() => setStatus("over")}
+            onClick={endGame}
             disabled={over || status === "loading"}
           >
             FIN
