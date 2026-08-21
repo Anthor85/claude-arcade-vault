@@ -38,3 +38,153 @@
   letter-spacing: 0.12em;
   color: var(--magenta);
 }
+
+/* ── Bisel del panel de control ──────────────────────────────────────────────
+   Debajo del CRT no va más pantalla: va la plancha donde una máquina real
+   lleva serigrafiada la leyenda de movimientos. De ahí el labio superior
+   iluminado y las teclas en relieve — el único sitio de la página que
+   representa algo que la mano toca. */
+
+.panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+  margin-top: 14px;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--line-2);
+  border-top-color: rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, var(--bg-2), var(--bg));
+}
+
+.panelItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 auto;
+  justify-content: center;
+  padding: 12px 18px;
+  /* Ranura entre leyendas, como el troquelado de la plancha. */
+  border-left: 1px solid var(--line-2);
+}
+
+.panelItem:first-child {
+  border-left: 0;
+}
+
+/* Tecla en relieve: cara más clara que la plancha, luz arriba, sombra abajo. */
+.cap {
+  font-family: var(--pixel);
+  font-size: 11px;
+  line-height: 1;
+  color: var(--cyan);
+  padding: 7px 9px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 2px 0 rgba(0, 0, 0, 0.6);
+  text-shadow: 0 0 6px rgba(0, 245, 255, 0.45);
+  white-space: nowrap;
+}
+
+/* Etiqueta serigrafiada: mismo registro que el resto de rótulos del HUD. */
+.capLabel {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+/* Cian = lo escucha el juego. Amarillo = lo escucha la plataforma. */
+.panelItem.platform .cap {
+  color: var(--yellow);
+  border-color: rgba(245, 255, 0, 0.28);
+  text-shadow: 0 0 6px rgba(245, 255, 0, 0.45);
+}
+
+@media (max-width: 640px) {
+  .panelItem {
+    flex: 1 1 50%;
+    justify-content: flex-start;
+    padding: 10px 14px;
+  }
+  /* En dos columnas la ranura vertical deja de significar nada. */
+  .panelItem:nth-child(odd) {
+    border-left: 0;
+  }
+}
+
+/* ── Mando táctil ────────────────────────────────────────────────────────────
+   Solo en dispositivos de puntero grueso: un portátil con pantalla táctil
+   sigue jugando con teclado, y una ventana estrecha en escritorio no necesita
+   botones que no se pueden pulsar. Reparto de máquina real: dirección a la
+   izquierda, acción a la derecha. */
+
+.touchPad {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .touchPad {
+    display: flex;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px;
+    /* La plancha no intercepta nada: solo los botones. */
+    pointer-events: none;
+    z-index: 4;
+  }
+}
+
+.touchGroup {
+  display: flex;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.touchBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(10, 10, 15, 0.55);
+  color: var(--cyan);
+  font-family: var(--pixel);
+  font-size: 14px;
+  line-height: 1;
+  /* Que el dedo no arrastre la página al mantener pulsado. */
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+.touchBtn:active {
+  background: rgba(0, 245, 255, 0.18);
+  box-shadow: inset 0 0 12px rgba(0, 245, 255, 0.5);
+}
+
+/* Disparar es lo único destructivo del mando: se distingue. */
+.touchFire {
+  color: var(--magenta);
+  border-color: rgba(255, 0, 110, 0.35);
+}
+
+.touchFire:active {
+  background: rgba(255, 0, 110, 0.18);
+  box-shadow: inset 0 0 12px rgba(255, 0, 110, 0.5);
+}
