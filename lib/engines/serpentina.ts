@@ -206,13 +206,19 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
     turns.push(next);
   }
 
-  /** Una vida menos. La puntuación y el nivel se conservan. */
+  /**
+   * Una vida menos. La puntuación se conserva, pero el contador de frutas
+   * vuelve a 0: cada vida arranca de nuevo en el nivel 1 y a 140 ms por paso,
+   * en vez de heredar la velocidad que acaba de matar al jugador.
+   */
   function loseLife() {
     lives = Math.max(0, lives - 1);
     if (lives === 0) {
       emitGameOver();
       return;
     }
+    eaten = 0;
+    level = levelFor(eaten);
     resetSnake();
     placeFruit();
   }

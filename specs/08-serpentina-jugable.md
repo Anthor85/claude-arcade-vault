@@ -84,19 +84,19 @@ Es la segunda ampliación del contrato (la primera fue `down`, `rotate` y `drop`
 
 ### Reglas del juego
 
-| Concepto           | Valor                                                                                                |
-| ------------------ | ---------------------------------------------------------------------------------------------------- |
-| Canvas interno     | 600×600 px, rejilla de 24×24 celdas de 25 px                                                         |
-| Serpiente inicial  | 4 segmentos en el centro, avanzando a la derecha                                                     |
-| Paso               | 140 ms en el nivel 1, −10 ms por nivel, con suelo en 60 ms                                           |
-| Nivel              | `1 + floor(frutas / 5)`, con tope en 9                                                               |
-| Puntuación         | +10 por fruta, sin bonus por especie                                                                 |
-| Crecimiento        | +1 segmento por fruta                                                                                |
-| Vidas              | 3                                                                                                    |
-| Muerte             | Chocar con un muro o con el propio cuerpo                                                            |
-| Al perder una vida | La serpiente vuelve al centro con 4 segmentos; puntuación y nivel se conservan; la fruta se recoloca |
-| Fin de partida     | Al perder la tercera vida                                                                            |
-| Fruta              | Especie elegida al azar entre las 22 del atlas, en una celda libre al azar                           |
+| Concepto           | Valor                                                                                                                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Canvas interno     | 600×600 px, rejilla de 24×24 celdas de 25 px                                                                                                                                               |
+| Serpiente inicial  | 4 segmentos en el centro, avanzando a la derecha                                                                                                                                           |
+| Paso               | 140 ms en el nivel 1, −10 ms por nivel, con suelo en 60 ms                                                                                                                                 |
+| Nivel              | `1 + floor(frutas / 5)`, con tope en 9                                                                                                                                                     |
+| Puntuación         | +10 por fruta, sin bonus por especie                                                                                                                                                       |
+| Crecimiento        | +1 segmento por fruta                                                                                                                                                                      |
+| Vidas              | 3                                                                                                                                                                                          |
+| Muerte             | Chocar con un muro o con el propio cuerpo                                                                                                                                                  |
+| Al perder una vida | La serpiente vuelve al centro con 4 segmentos; la puntuación se conserva, pero el contador de frutas vuelve a 0, así que el nivel baja a 1 y el paso vuelve a 140 ms; la fruta se recoloca |
+| Fin de partida     | Al perder la tercera vida                                                                                                                                                                  |
+| Fruta              | Especie elegida al azar entre las 22 del atlas, en una celda libre al azar                                                                                                                 |
 
 El giro se guarda en una cola de a lo sumo dos direcciones que se consume un paso por tick. Sin ella, pulsar `↑` y `←` dentro del mismo tick invierte el rumbo 180º y la serpiente se muerde sola. Un giro que invierta la dirección vigente se descarta al encolarlo.
 
@@ -107,7 +107,7 @@ El giro se guarda en una cola de a lo sumo dos direcciones que se consume un pas
 3. **Motor.** Crear `lib/engines/serpentina.ts` con la mecánica de la tabla de reglas: closure en `mount`, `canvas` por parámetro, `ACTION_KEYS` que escribe en el mismo mapa de teclas que el teclado, `SCROLL_KEYS` con `preventDefault` para las flechas, bandera `paused` que salta el `update` sin parar el `requestAnimationFrame`, acumulador de tiempo con `dt` acotado, listeners retirados en un `destroy` idempotente. Sin HUD ni overlays dentro del canvas. Exportar `serpentinaEngine`. Prueba manual: `npx tsc --noEmit` pasa sin un solo `any`.
 4. **Registro.** Añadir `serpentina: () => import("./serpentina").then((m) => m.serpentinaEngine)` a `ENGINES` en `lib/engines/index.ts`. Prueba manual: `npm run build` pasa y el chunk del motor aparece como carga diferida.
 5. **Canvas jugable.** Sin más cambios en el reproductor, comprobar que `/juegos/serpentina/jugar` monta el canvas real. Prueba manual: jugar hasta comer cinco frutas; la puntuación marca 50, el nivel sube a 2, la serpiente es visiblemente más rápida y no hay ningún HUD ni overlay dentro del canvas.
-6. **Vidas y fin de partida.** Prueba manual: chocar contra un muro, contra el propio cuerpo y agotar las tres vidas; el HUD descuenta, la serpiente reaparece en el centro conservando la puntuación, y la tercera muerte abre el modal con la marca real.
+6. **Vidas y fin de partida.** Prueba manual: chocar contra un muro, contra el propio cuerpo y agotar las tres vidas; el HUD descuenta, la serpiente reaparece en el centro conservando la puntuación y con el nivel de vuelta a 1, y la tercera muerte abre el modal con la marca real.
 7. **Ficha y portada.** Reescribir `short` y `long` de `serpentina` en `lib/games.ts` (frutas, tres vidas, velocidad creciente) y rehacer `.cover-snake` en `app/globals.css` para que el objetivo lea como una fruta. Prueba manual: `/juegos` sigue listando nueve fichas, la de Serpentina bajo el filtro ARCADE con su portada nueva, y `/juegos/serpentina` muestra el texto actualizado.
 8. **Pausa, fin y reinicio.** Prueba manual: `PAUSA` congela la serpiente, `REANUDAR` continúa sin saltos ni teletransportes, `FIN` abre el modal con lo marcado, `JUGAR DE NUEVO` reinicia con 3 vidas y puntuación 0, y cambiar de pestaña deja la partida pausada.
 9. **Controles táctiles.** Prueba manual: en el emulador de móvil de las DevTools aparecen `◀ ▲ ▼ ▶` en el grupo de dirección, los cuatro giran la serpiente y no hay ningún botón en el grupo de acción; en escritorio el mando no se ve.
@@ -122,7 +122,7 @@ El giro se guarda en una cola de a lo sumo dos direcciones que se consume un pas
 - [ ] Las frutas se dibujan con recortes de `fruits.png`, centradas en su celda y sin deformarse, y la especie cambia entre bocados.
 - [ ] Cada fruta suma 10 puntos y un segmento.
 - [ ] El nivel del HUD es `1 + floor(frutas / 5)` con tope en 9, y el paso baja 10 ms por nivel desde 140 ms hasta un suelo de 60 ms.
-- [ ] Chocar contra un muro o contra el propio cuerpo resta una vida, devuelve la serpiente al centro con 4 segmentos y conserva la puntuación y el nivel.
+- [ ] Chocar contra un muro o contra el propio cuerpo resta una vida, devuelve la serpiente al centro con 4 segmentos, conserva la puntuación y devuelve el nivel a 1 con el paso a 140 ms.
 - [ ] Perder la tercera vida abre el modal de fin de partida con la puntuación real.
 - [ ] Pulsar dos flechas dentro de un mismo paso no invierte el rumbo 180º ni provoca una muerte instantánea.
 - [ ] La fruta nunca aparece sobre una celda ocupada por la serpiente.
@@ -153,7 +153,8 @@ El giro se guarda en una cola de a lo sumo dos direcciones que se consume un pas
 - **No:** reutilizar `thrust` como "arriba". No habría tocado el contrato, pero su glifo se llama "Propulsar" y cae en el grupo de acción del mando, a la derecha: la cruceta quedaría partida en dos por una etiqueta mentirosa.
 - **No:** control por giro relativo con solo `left` y `right`. Cabía en el contrato actual, pero el Snake de Nokia es de direcciones absolutas y el control relativo cambia el juego.
 - **Sí:** tres vidas en vez del morir-y-acabar del original. El HUD del reproductor tiene un campo `Vidas` y `hasLives: false` lo dejaría vacío en un juego de arcade; tres vidas alargan la partida sin cambiar la mecánica.
-- **Sí:** conservar puntuación y nivel al perder una vida. Reiniciarlos convertiría cada vida en una partida distinta y haría el marcador ilegible.
+- **Sí:** conservar la puntuación al perder una vida. Reiniciarla convertiría cada vida en una partida distinta y haría el marcador ilegible.
+- **Sí:** reiniciar el contador de frutas al perder una vida, y con él el nivel y la velocidad. Heredar el paso que acaba de matar al jugador encadena las tres muertes seguidas; empezar cada vida a 140 ms le devuelve el margen para recuperarse. El marcador no se resiente porque la puntuación sí se conserva.
 - **Sí:** usar `fruits.png` para la fruta y dibujar la serpiente con primitivas en verde neón. Aprovecha el material aportado en lo único que cubre y mantiene el juego dentro del lenguaje visual de la plataforma.
 - **No:** buscar o dibujar una lámina de serpiente para completar el arte. Es un encargo de ilustración, no de integración, y bloquearía la spec.
 - **No:** ignorar el PNG y pintar la fruta como un núcleo magenta. Habría ahorrado 585 KB de asset, pero tira el material que el usuario aportó expresamente.
