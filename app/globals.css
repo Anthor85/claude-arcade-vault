@@ -478,6 +478,15 @@ a {
     0 0 14px rgba(245, 255, 0, 0.6),
     inset 0 0 8px rgba(245, 255, 0, 0.35);
 }
+/* Botón de solo icono: ancho fijo, para que un conmutador no mueva la fila al
+   cambiar de estado. El padding lateral del texto sobra. */
+.btn.icon {
+  width: 46px;
+  padding-right: 0;
+  padding-left: 0;
+  gap: 0;
+}
+
 .btn.ghost {
   border-color: var(--ink-faint);
   color: var(--ink-dim);
@@ -1103,6 +1112,7 @@ a {
 }
 .hud-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
