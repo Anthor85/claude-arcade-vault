@@ -172,11 +172,13 @@ export function GamePlayer({ game }: { game: Game }) {
         <div className="hud-actions">
           <button
             type="button"
-            className="btn yellow"
+            className="btn yellow icon"
             onClick={togglePause}
             disabled={over || status === "loading"}
+            aria-label={paused ? "Reanudar" : "Pausa"}
+            title={paused ? "Reanudar (P)" : "Pausa (P)"}
           >
-            {paused ? "REANUDAR" : "PAUSA"}
+            <PauseGlyph paused={paused} />
           </button>
           <button
             type="button"
@@ -343,6 +345,46 @@ function CanvasArena({
 }
 
 // ── Mando táctil ──────────────────────────────────────────────────────────────
+
+/**
+ * Icono del conmutador de pausa: ▶ para reanudar, ❚❚ para pausar.
+ *
+ * Va en SVG y no en texto porque las dos etiquetas que había —`PAUSA` y
+ * `REANUDAR`— no miden lo mismo: el botón cambiaba de ancho al alternar y
+ * empujaba a `FIN` y `SALIR` fuera del marco. Un icono de tamaño fijo deja la
+ * fila quieta. La tecla sigue anunciada en la leyenda del panel y en el
+ * `title`, así que no se pierde nada al quitar la palabra.
+ *
+ * Rectángulos escalonados en vez de un triángulo liso: es el mismo lenguaje
+ * pixelado de `highlight-icons.tsx` y del resto del marco CRT.
+ */
+function PauseGlyph({ paused }: { paused: boolean }) {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="currentColor"
+      shapeRendering="crispEdges"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {paused ? (
+        <>
+          <rect x="2" y="1" width="2" height="10" />
+          <rect x="4" y="2" width="2" height="8" />
+          <rect x="6" y="3" width="2" height="6" />
+          <rect x="8" y="4" width="2" height="4" />
+        </>
+      ) : (
+        <>
+          <rect x="2" y="1" width="3" height="10" />
+          <rect x="7" y="1" width="3" height="10" />
+        </>
+      )}
+    </svg>
+  );
+}
 
 /** Glifo y nombre accesible de cada acción del contrato. */
 const ACTION_FACE: Record<GameAction, { glyph: string; label: string }> = {
