@@ -392,13 +392,14 @@ const ACTION_FACE: Record<GameAction, { glyph: string; label: string }> = {
   right: { glyph: "▶", label: "Girar a la derecha" },
   thrust: { glyph: "▲", label: "Propulsar" },
   fire: { glyph: "●", label: "Disparar" },
+  up: { glyph: "▲", label: "Ir arriba" },
   down: { glyph: "▼", label: "Bajar" },
   rotate: { glyph: "⟳", label: "Rotar" },
   drop: { glyph: "⤓", label: "Caída instantánea" },
 };
 
 /** Dirección a la izquierda, acción a la derecha: reparto de máquina real. */
-const STEERING: readonly GameAction[] = ["left", "right", "down"];
+const STEERING: readonly GameAction[] = ["up", "left", "right", "down"];
 
 type TouchPadProps = {
   actions: readonly GameAction[];
