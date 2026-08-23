@@ -1,6 +1,6 @@
 # SPEC 07 — Arkanoid jugable: el tercer motor de la plataforma
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 05, SPEC 06
 > **Fecha:** 2026-08-23
 > **Objetivo:** Portar el Arkanoid de `references/started-games/04-claude-arkanoid` a un motor TypeScript que cumpla el contrato `GameEngine`, y darle ficha propia en el catálogo, de modo que `/juegos/arkanoid/jugar` sea una partida real de cinco niveles cuya puntuación se inscribe en el Salón de la Fama.

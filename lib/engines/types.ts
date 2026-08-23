@@ -20,6 +20,8 @@ export type GameAction =
   | "right"
   | "thrust"
   | "fire"
+  /** Ir hacia arriba. Cuarta dirección absoluta. */
+  | "up"
   /** Bajar una fila (soft drop). */
   | "down"
   /** Girar la pieza. */
