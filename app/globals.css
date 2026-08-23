@@ -778,6 +778,47 @@ a {
   );
 }
 
+/* Arkanoid: rejilla de bloques con huecos, paleta y bola. Se distingue de
+   .cover-bricks —franjas a sangre— porque aquí la rejilla flota sobre el
+   tablero y se ve el juego: paleta abajo y bola en vuelo. */
+.cover-arkanoid {
+  background: linear-gradient(180deg, #04241a, #0a0a18 70%);
+}
+.cover-arkanoid::after {
+  content: "";
+  position: absolute;
+  inset: 14% 12% 42% 12%;
+  /* Cada bloque mide menos que su celda, así que la junta entre bloques sale
+     sola: las posiciones 0/33/66/100 % reparten el hueco sobrante. */
+  background:
+    linear-gradient(#ff006e, #ff006e) 0 0/24% 22%,
+    linear-gradient(#9aa0a6, #9aa0a6) 33.33% 0/24% 22%,
+    linear-gradient(#ff006e, #ff006e) 66.66% 0/24% 22%,
+    linear-gradient(#ff5fa8, #ff5fa8) 100% 0/24% 22%,
+    linear-gradient(#ffae00, #ffae00) 0 50%/24% 22%,
+    linear-gradient(#ffae00, #ffae00) 33.33% 50%/24% 22%,
+    linear-gradient(#9aa0a6, #9aa0a6) 66.66% 50%/24% 22%,
+    linear-gradient(#ffae00, #ffae00) 100% 50%/24% 22%,
+    linear-gradient(var(--green), var(--green)) 0 100%/24% 22%,
+    linear-gradient(var(--cyan), var(--cyan)) 33.33% 100%/24% 22%,
+    linear-gradient(var(--green), var(--green)) 66.66% 100%/24% 22%,
+    linear-gradient(var(--cyan), var(--cyan)) 100% 100%/24% 22%;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.35));
+  image-rendering: pixelated;
+}
+.cover-arkanoid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, var(--green), var(--cyan)) 50% 88%/38% 8px no-repeat,
+    radial-gradient(circle at 66% 70%, #fff 0 5px, transparent 6px) 0 0/100%
+      100% no-repeat;
+  border-radius: 2px;
+  filter: drop-shadow(0 0 8px rgba(0, 245, 255, 0.6));
+}
+
 .cover-tetro {
   background: radial-gradient(circle at 50% 100%, #2a004a, #0a0a18);
 }

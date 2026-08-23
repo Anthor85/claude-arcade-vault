@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact-form";
-import { HighlightIcon, type HighlightIconKind } from "@/components/highlight-icons";
+import {
+  HighlightIcon,
+  type HighlightIconKind,
+} from "@/components/highlight-icons";
 import { Reveal } from "@/components/reveal";
 import styles from "@/components/about.module.css";
 
@@ -17,7 +20,11 @@ const HIGHLIGHTS: { kind: HighlightIconKind; text: string; color: string }[] = [
     text: "JUEGOS EN HTML — CORREN EN CUALQUIER NAVEGADOR",
     color: styles.cyan,
   },
-  { kind: "PLANT", text: "PROYECTO EN CONSTANTE CRECIMIENTO", color: styles.green },
+  {
+    kind: "PLANT",
+    text: "PROYECTO EN CONSTANTE CRECIMIENTO",
+    color: styles.green,
+  },
 ];
 
 const DIVIDER_PIXELS = Array.from({ length: 24 }, (_, i) => i);
@@ -30,9 +37,10 @@ export default function AcercaPage() {
         <div className={`${styles.kicker} pixel neon-yellow`}>▸ ACERCA DE</div>
         <h1 className={styles.aboutTitle}>ACERCA DE ARCADE VAULT</h1>
         <p className={styles.aboutMission}>
-          ARCADE VAULT nació del amor por los videojuegos clásicos. Nuestra misión es preservar y
-          celebrar los arcades que definieron una generación, haciéndolos accesibles para todos, en
-          cualquier lugar y sin costo.
+          ARCADE VAULT nació del amor por los videojuegos clásicos. Nuestra
+          misión es preservar y celebrar los arcades que definieron una
+          generación, haciéndolos accesibles para todos, en cualquier lugar y
+          sin costo.
         </p>
 
         <div className={styles.highlightRow}>
@@ -67,8 +75,8 @@ export default function AcercaPage() {
             <div className={`${styles.kicker} pixel neon-cyan`}>▸ CONTACTO</div>
             <h2 className={styles.contactTitle}>CONTÁCTANOS</h2>
             <p className={styles.contactSub}>
-              ¿Tienes alguna sugerencia, quieres proponer un juego, o simplemente quieres saludar?
-              Escríbenos.
+              ¿Tienes alguna sugerencia, quieres proponer un juego, o
+              simplemente quieres saludar? Escríbenos.
             </p>
             <div className={styles.contactTips}>
               <div className={styles.tip}>

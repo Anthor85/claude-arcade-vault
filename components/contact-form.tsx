@@ -87,7 +87,10 @@ export function ContactForm() {
           </div>
 
           {/* Honeypot: invisible para personas, irresistible para bots. */}
-          <div aria-hidden="true" style={{ position: "absolute", left: "-9999px" }}>
+          <div
+            aria-hidden="true"
+            style={{ position: "absolute", left: "-9999px" }}
+          >
             <label htmlFor="contact-website">No rellenes este campo</label>
             <input
               id="contact-website"
@@ -124,11 +127,18 @@ export function ContactForm() {
           </div>
           <div className={styles.termBody}>
             <div className={styles.line}>
-              <span className={styles.prompt}>vault@arcade:~$</span> ./send_message --to=team
+              <span className={styles.prompt}>vault@arcade:~$</span>{" "}
+              ./send_message --to=team
             </div>
-            <div className={`${styles.line} ${styles.dim}`}>[OK] Conectando con servidor…</div>
-            <div className={`${styles.line} ${styles.dim}`}>[OK] Validando contenido…</div>
-            <div className={`${styles.line} ${styles.dim}`}>[OK] Transmitiendo paquete…</div>
+            <div className={`${styles.line} ${styles.dim}`}>
+              [OK] Conectando con servidor…
+            </div>
+            <div className={`${styles.line} ${styles.dim}`}>
+              [OK] Validando contenido…
+            </div>
+            <div className={`${styles.line} ${styles.dim}`}>
+              [OK] Transmitiendo paquete…
+            </div>
             <div className={`${styles.line} ${styles.success}`}>
               &gt; MENSAJE RECIBIDO. TE RESPONDEREMOS PRONTO. GRACIAS,{" "}
               {state.status === "ok" ? state.name.toUpperCase() : ""}.

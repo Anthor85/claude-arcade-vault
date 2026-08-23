@@ -12,6 +12,7 @@ type EngineLoader = () => Promise<GameEngine>;
 const ENGINES: Record<string, EngineLoader> = {
   asteroides: () => import("./asteroids").then((m) => m.asteroidsEngine),
   caida: () => import("./tetris").then((m) => m.tetrisEngine),
+  arkanoid: () => import("./arkanoid").then((m) => m.arkanoidEngine),
 };
 
 /** ¿Este juego tiene un motor real, o toca maqueta? */
