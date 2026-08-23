@@ -838,22 +838,42 @@ a {
   image-rendering: pixelated;
 }
 
+/* Serpentina: la serpiente en L, con dos giros en ángulo recto —lo que la
+   distingue de una barra verde— persiguiendo una fruta. Rejilla virtual de
+   8x5: para k columnas, la celda i cae exacta en i*100/(k-1) %. Las celdas
+   miden algo menos que su hueco, así que la junta entre segmentos sale sola. */
 .cover-snake {
   background: linear-gradient(135deg, #003a2a, #0a0a18);
 }
 .cover-snake::after {
   content: "";
   position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(circle at 70% 50%, var(--magenta) 0 6px, transparent 7px),
-    linear-gradient(90deg, var(--green) 0 40px, transparent 40px) 20% 50% /
-      200px 12px no-repeat,
-    linear-gradient(90deg, var(--green) 0 12px, transparent 12px)
-      calc(20% + 40px) calc(50% - 12px) / 12px 12px no-repeat,
-    linear-gradient(90deg, var(--green) 0 12px, transparent 12px)
-      calc(20% + 28px) calc(50% - 12px) / 12px 12px no-repeat;
+  inset: 18% 10%;
+  background:
+    linear-gradient(var(--green), var(--green)) 14.286% 75% / 11.5% 17%,
+    linear-gradient(var(--green), var(--green)) 28.571% 75% / 11.5% 17%,
+    linear-gradient(var(--green), var(--green)) 42.857% 75% / 11.5% 17%,
+    linear-gradient(var(--green), var(--green)) 42.857% 50% / 11.5% 17%,
+    linear-gradient(var(--green), var(--green)) 57.143% 50% / 11.5% 17%,
+    linear-gradient(#c8ffdd, #c8ffdd) 71.429% 50% / 11.5% 17%;
+  background-repeat: no-repeat;
   filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.6));
+  image-rendering: pixelated;
+}
+/* La fruta ocupa la celda 7 de esa misma rejilla: centro en 93,75 %. La hoja
+   es lo que la hace leer como fruta y no como otro punto-objetivo. */
+.cover-snake::before {
+  content: "";
+  position: absolute;
+  inset: 18% 10%;
+  background:
+    radial-gradient(
+      ellipse 10px 4px at calc(93.75% + 7px) calc(50% - 11px),
+      var(--green) 0 99%,
+      transparent 100%
+    ),
+    radial-gradient(circle at 93.75% 50%, #ff3355 0 13px, transparent 14px);
+  filter: drop-shadow(0 0 8px rgba(255, 51, 85, 0.55));
 }
 
 .cover-glot {

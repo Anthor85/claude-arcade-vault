@@ -1,6 +1,6 @@
 # SPEC 08 — Serpentina jugable: la serpiente de Nokia con frutas
 
-> **Estado:** Aprobada
+> **Estado:** Implementado
 > **Depende de:** SPEC 04, SPEC 05
 > **Fecha:** 2026-08-23
 > **Objetivo:** Escribir desde cero el motor `lib/engines/serpentina.ts` —una serpiente de rejilla al estilo del Snake de los Nokia, con tres vidas, velocidad creciente y frutas dibujadas con la lámina de `references/source-assets/snake-assets`— y conectarlo a la ficha `serpentina`, de modo que `/juegos/serpentina/jugar` sea una partida real cuya puntuación se inscribe en el Salón de la Fama.

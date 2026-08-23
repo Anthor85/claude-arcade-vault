@@ -1,6 +1,6 @@
 # SPEC 04 — Supabase: autenticación real y puntuaciones persistentes
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 01, SPEC 02
 > **Fecha:** 2026-08-20
 > **Objetivo:** Sustituir la sesión y las puntuaciones falsas de `localStorage` por Supabase Auth (email + contraseña) y dos tablas en Postgres (`profiles`, `scores`) con RLS, de modo que `/acceso`, el nav, el reproductor y el Salón de la Fama trabajen con datos reales.
