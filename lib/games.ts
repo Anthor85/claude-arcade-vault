@@ -92,6 +92,17 @@ export const GAMES: Game[] = [
     plays: "6.4K",
   },
   {
+    id: "arkanoid",
+    title: "ARKANOID",
+    short: "Cinco niveles de bloques y una paleta que no perdona.",
+    long: "Mueve la paleta con el ratón o las flechas y saca la bola para desmontar cinco rejillas de bloques, cada una con más grises: los grises aguantan dos golpes y valen el doble. Cada diez bloques rotos la bola acelera. De las ruinas caen cápsulas de colores: vida extra, paleta doble, multibola, láser y salto de nivel.",
+    cat: "ARCADE",
+    cover: "cover-arkanoid",
+    color: "green",
+    best: 33150,
+    plays: "8.7K",
+  },
+  {
     id: "duelo-pixel",
     title: "DUELO PIXEL",
     short: "Dos paletas. Una pelota. Reflejos máximos.",

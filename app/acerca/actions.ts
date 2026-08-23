@@ -48,25 +48,53 @@ function readInput(formData: FormData): ContactInput {
 
 function validate(input: ContactInput): ContactState | null {
   if (!input.name) {
-    return { status: "error", message: "EL NOMBRE ES OBLIGATORIO.", field: "name" };
+    return {
+      status: "error",
+      message: "EL NOMBRE ES OBLIGATORIO.",
+      field: "name",
+    };
   }
   if (input.name.length > MAX_NAME) {
-    return { status: "error", message: `EL NOMBRE NO PUEDE PASAR DE ${MAX_NAME} CARACTERES.`, field: "name" };
+    return {
+      status: "error",
+      message: `EL NOMBRE NO PUEDE PASAR DE ${MAX_NAME} CARACTERES.`,
+      field: "name",
+    };
   }
   if (!input.email) {
-    return { status: "error", message: "EL CORREO ES OBLIGATORIO.", field: "email" };
+    return {
+      status: "error",
+      message: "EL CORREO ES OBLIGATORIO.",
+      field: "email",
+    };
   }
   if (input.email.length > MAX_EMAIL) {
-    return { status: "error", message: `EL CORREO NO PUEDE PASAR DE ${MAX_EMAIL} CARACTERES.`, field: "email" };
+    return {
+      status: "error",
+      message: `EL CORREO NO PUEDE PASAR DE ${MAX_EMAIL} CARACTERES.`,
+      field: "email",
+    };
   }
   if (!EMAIL_RE.test(input.email)) {
-    return { status: "error", message: "EL CORREO NO TIENE UN FORMATO VÁLIDO.", field: "email" };
+    return {
+      status: "error",
+      message: "EL CORREO NO TIENE UN FORMATO VÁLIDO.",
+      field: "email",
+    };
   }
   if (!input.msg) {
-    return { status: "error", message: "EL MENSAJE ES OBLIGATORIO.", field: "msg" };
+    return {
+      status: "error",
+      message: "EL MENSAJE ES OBLIGATORIO.",
+      field: "msg",
+    };
   }
   if (input.msg.length > MAX_MSG) {
-    return { status: "error", message: `EL MENSAJE NO PUEDE PASAR DE ${MAX_MSG} CARACTERES.`, field: "msg" };
+    return {
+      status: "error",
+      message: `EL MENSAJE NO PUEDE PASAR DE ${MAX_MSG} CARACTERES.`,
+      field: "msg",
+    };
   }
   return null;
 }
@@ -85,7 +113,9 @@ async function rateLimitKey(): Promise<string> {
 /** Registra el envío y devuelve `false` si la IP ha agotado su cupo. */
 function takeSlot(key: string): boolean {
   const now = Date.now();
-  const fresh = (recentSends.get(key) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
+  const fresh = (recentSends.get(key) ?? []).filter(
+    (t) => now - t < RATE_WINDOW_MS,
+  );
   if (fresh.length >= RATE_MAX) {
     recentSends.set(key, fresh);
     return false;
@@ -116,7 +146,10 @@ export async function sendContactMessage(
   if (invalid) return invalid;
 
   if (!takeSlot(await rateLimitKey())) {
-    return { status: "error", message: "DEMASIADOS ENVÍOS. INTÉNTALO EN UNOS MINUTOS." };
+    return {
+      status: "error",
+      message: "DEMASIADOS ENVÍOS. INTÉNTALO EN UNOS MINUTOS.",
+    };
   }
 
   const apiKey = process.env.RESEND_API_KEY;
@@ -132,7 +165,11 @@ export async function sendContactMessage(
     // Sin cuerpo del mensaje en el log: solo qué falta configurar.
     console.error(
       "[contacto] faltan variables de entorno:",
-      [!apiKey && "RESEND_API_KEY", !from && "CONTACT_FROM", !to && "CONTACT_TO"]
+      [
+        !apiKey && "RESEND_API_KEY",
+        !from && "CONTACT_FROM",
+        !to && "CONTACT_TO",
+      ]
         .filter(Boolean)
         .join(", "),
     );
@@ -162,11 +199,18 @@ export async function sendContactMessage(
     });
 
     if (error) {
-      console.error("[contacto] Resend devolvió error:", error.name, error.message);
+      console.error(
+        "[contacto] Resend devolvió error:",
+        error.name,
+        error.message,
+      );
       return failure;
     }
   } catch (err) {
-    console.error("[contacto] fallo al enviar:", err instanceof Error ? err.message : err);
+    console.error(
+      "[contacto] fallo al enviar:",
+      err instanceof Error ? err.message : err,
+    );
     return failure;
   }
 

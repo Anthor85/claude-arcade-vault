@@ -20,12 +20,12 @@ El CSS de la página **no está** en `app/globals.css`: vive en `references/home
 **Dentro:**
 
 - Nueva ruta `app/acerca/page.tsx` (server component) con las tres partes de `about.jsx`:
-  1. **Hero** — kicker `▸ ACERCA DE`, título `ACERCA DE ARCADE VAULT`, párrafo de misión y la fila de 3 *highlights* (`HECHO CON ❤️ PARA JUGADORES` magenta, `JUEGOS EN HTML — CORREN EN CUALQUIER NAVEGADOR` cian, `PROYECTO EN CONSTANTE CRECIMIENTO` verde) con sus iconos pixel SVG.
+  1. **Hero** — kicker `▸ ACERCA DE`, título `ACERCA DE ARCADE VAULT`, párrafo de misión y la fila de 3 _highlights_ (`HECHO CON ❤️ PARA JUGADORES` magenta, `JUEGOS EN HTML — CORREN EN CUALQUIER NAVEGADOR` cian, `PROYECTO EN CONSTANTE CRECIMIENTO` verde) con sus iconos pixel SVG.
   2. **Banda divisoria** — dos barras en degradado y 24 píxeles parpadeantes con retardo escalonado, decorativa (`aria-hidden`).
-  3. **Contacto** — rejilla de dos columnas: intro (kicker `▸ CONTACTO`, título `CONTÁCTANOS`, subtítulo y los 3 *tips* con LED) y el formulario.
+  3. **Contacto** — rejilla de dos columnas: intro (kicker `▸ CONTACTO`, título `CONTÁCTANOS`, subtítulo y los 3 _tips_ con LED) y el formulario.
 - **Formulario de contacto real.** Campos `NOMBRE`, `CORREO ELECTRÓNICO`, `MENSAJE`, botón `▶ ENVIAR MENSAJE`. Validación de cliente con el `shake` del prototipo, estado de envío, error visible y terminal de éxito `VAULT-OS`.
 - **Server Action `sendContactMessage`** en `app/acerca/actions.ts` que revalida los datos y envía el email con Resend.
-- **Antispam:** campo trampa (*honeypot*) oculto y límite de frecuencia por IP en memoria.
+- **Antispam:** campo trampa (_honeypot_) oculto y límite de frecuencia por IP en memoria.
 - **Configuración por entorno:** `RESEND_API_KEY`, `CONTACT_FROM`, `CONTACT_TO`, con `.env.template` versionado y `.env.local` ignorado por git.
 - Estilos en un CSS Module nuevo, `components/about.module.css`.
 - Nav actualizado: enlace `Acerca de` → `/acerca`, después de `Salón de la Fama`, en la barra y en el panel móvil.
@@ -86,6 +86,7 @@ Los textos de la página (misión, highlights, tips, líneas de la terminal) son
    - Si va bien, devuelve `{ status: "ok", name }`.
 
    Antes de escribirlo, consultar `node_modules/next/dist/docs/01-app/` sobre Server Actions y lectura de cabeceras, como exige `AGENTS.md`.
+
 5. **Formulario.** Crear `components/contact-form.tsx` (`"use client"`) con `useActionState(sendContactMessage, { status: "idle" })` y `useFormStatus` (o el `pending` que devuelva `useActionState`) para el estado de envío:
    - Campos controlados como en el prototipo, más el honeypot (`name="website"`, oculto, `tabIndex={-1}`, `autoComplete="off"`).
    - Validación de cliente previa: si algún campo está vacío, activa `shake` 400 ms y no envía.
@@ -94,6 +95,7 @@ Los textos de la página (misión, highlights, tips, líneas de la terminal) son
    - Si el estado es `ok`: terminal `VAULT-OS` con el nombre en mayúsculas y el botón `ENVIAR OTRO MENSAJE`, que limpia el formulario y vuelve al estado inicial.
 
    Prueba manual: enviar con un campo vacío → shake sin llamada al servidor; enviar completo con la API key puesta → llega el correo a `CONTACT_TO` y aparece la terminal; enviar con `RESEND_API_KEY` inválida → mensaje de error y los datos siguen en el formulario.
+
 6. **Página.** Crear `app/acerca/page.tsx` como server component: hero + highlights + banda divisoria + sección de contacto con `<ContactForm />`, envolviendo divisoria y contacto en `<Reveal>`. Añadir `export const metadata` con título y descripción de la página. Prueba manual: `/acerca` renderiza las tres partes y la divisoria y el contacto aparecen con fundido al bajar.
 7. **Nav.** Actualizar `components/nav.tsx`: enlace `Acerca de` → `/acerca` tras `Salón de la Fama`, en la barra y en el panel móvil, con estado activo `pathname.startsWith("/acerca")`. Prueba manual: en `/acerca` el enlace activo es `Acerca de` y ninguno de los otros.
 8. **Repaso responsive.** Verificar `/acerca` a 1440 px, 900 px, 820 px y 375 px: los highlights pasan de 3 a 1 columna (820 px), la rejilla de contacto pasa a 1 columna (900 px), la terminal no desborda y no hay scroll horizontal.
@@ -141,15 +143,15 @@ Los textos de la página (misión, highlights, tips, líneas de la terminal) son
 
 ## Riesgos
 
-| Riesgo | Mitigación |
-| --- | --- |
-| Sin dominio verificado, Resend solo entrega desde `onboarding@resend.dev` al email de la cuenta: en pruebas parece que "no llega" | `.env.template` lo advierte en un comentario y el criterio de aceptación del envío se verifica con esa combinación. |
-| La API key se filtra al cliente por importar `actions.ts` desde un componente sin `"use server"` bien colocado | La directiva va en la primera línea del fichero y el criterio de aceptación incluye un `grep` sobre `.next/static`. |
-| El Server Action puede invocarse fuera del formulario con datos arbitrarios | Toda la validación se repite en servidor y hay límite por IP; el honeypot solo filtra bots ingenuos, no es la defensa principal. |
-| `x-forwarded-for` ausente o falsificable según el despliegue: el límite por IP se puede saltar | Se acepta como mitigación parcial. Si no hay IP, se usa una clave común `unknown`, que limita el conjunto en vez de dejarlo abierto. |
+| Riesgo                                                                                                                                  | Mitigación                                                                                                                                               |
+| --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sin dominio verificado, Resend solo entrega desde `onboarding@resend.dev` al email de la cuenta: en pruebas parece que "no llega"       | `.env.template` lo advierte en un comentario y el criterio de aceptación del envío se verifica con esa combinación.                                      |
+| La API key se filtra al cliente por importar `actions.ts` desde un componente sin `"use server"` bien colocado                          | La directiva va en la primera línea del fichero y el criterio de aceptación incluye un `grep` sobre `.next/static`.                                      |
+| El Server Action puede invocarse fuera del formulario con datos arbitrarios                                                             | Toda la validación se repite en servidor y hay límite por IP; el honeypot solo filtra bots ingenuos, no es la defensa principal.                         |
+| `x-forwarded-for` ausente o falsificable según el despliegue: el límite por IP se puede saltar                                          | Se acepta como mitigación parcial. Si no hay IP, se usa una clave común `unknown`, que limita el conjunto en vez de dejarlo abierto.                     |
 | Al pasar el CSS a módulo se pierden reglas que dependían de descendencia con clases globales (`.contact-form textarea`, `.field input`) | Cada selector portado se revisa uno a uno contra las líneas 1071-1146 de `styles.css`; los que apuntan a clases globales se envuelven en `:global(...)`. |
-| `resend` es la primera dependencia de servidor del proyecto y podría acabar en el bundle de cliente | Solo se importa en `app/acerca/actions.ts`, que es código de servidor; ningún componente cliente la importa. |
-| Las animaciones `shake`, `pxblink` y `blink` molestan a usuarios sensibles al movimiento | Envolver las animaciones del módulo en `@media (prefers-reduced-motion: no-preference)`, como en `home.module.css`. |
+| `resend` es la primera dependencia de servidor del proyecto y podría acabar en el bundle de cliente                                     | Solo se importa en `app/acerca/actions.ts`, que es código de servidor; ningún componente cliente la importa.                                             |
+| Las animaciones `shake`, `pxblink` y `blink` molestan a usuarios sensibles al movimiento                                                | Envolver las animaciones del módulo en `@media (prefers-reduced-motion: no-preference)`, como en `home.module.css`.                                      |
 
 ## Lo que **no** entra en esta spec
 
