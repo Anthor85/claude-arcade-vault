@@ -136,7 +136,6 @@
     bottom: 0;
     left: 0;
     align-items: flex-end;
-    justify-content: space-between;
     gap: 12px;
     padding: 16px;
     /* La plancha no intercepta nada: solo los botones. */
@@ -145,10 +144,52 @@
   }
 }
 
-.touchGroup {
+/* Cruceta a la izquierda y acciones a la derecha, cada grupo centrado en su
+   mitad de la franja: el pulgar de cada mano cae sobre el suyo. */
+.touchDpad,
+.touchActions {
+  flex: 1;
+}
+
+/* Rejilla 3×3 con el centro vacío. Las direcciones que el motor no declara
+   dejan su hueco, así que los botones no cambian de sitio de un juego a otro. */
+.touchDpad {
+  display: grid;
+  grid-template-areas:
+    ".    up    .    "
+    "left .     right"
+    ".    down  .    ";
+  gap: 8px;
+  justify-content: center;
+}
+
+.slotUp {
+  grid-area: up;
+}
+
+.slotLeft {
+  grid-area: left;
+}
+
+.slotRight {
+  grid-area: right;
+}
+
+.slotDown {
+  grid-area: down;
+}
+
+/* Hueco de una dirección que este juego no usa: ocupa sitio y nada más. */
+.touchSlot {
+  width: 60px;
+  height: 60px;
+}
+
+.touchActions {
   display: flex;
+  align-items: flex-end;
+  justify-content: center;
   gap: 12px;
-  pointer-events: auto;
 }
 
 .touchBtn {
@@ -165,6 +206,9 @@
   font-family: var(--pixel);
   font-size: 14px;
   line-height: 1;
+  /* Solo los botones interceptan: la franja y los huecos dejan ver y tocar
+     el canvas que hay debajo. */
+  pointer-events: auto;
   /* Que el dedo no arrastre la página al mantener pulsado. */
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
@@ -243,6 +287,14 @@
 .skinSelect:focus-visible {
   outline: 1px solid var(--cyan);
   outline-offset: 2px;
+}
+
+/* En estrecho, el selector se lleva su línea entera y deja a PAUSA, FIN y
+   SALIR juntos en la de abajo: antes SALIR caía solo a la segunda fila. */
+@media (max-width: 640px) {
+  .skinField {
+    flex-basis: 100%;
+  }
 }
 
 /* El desplegable abierto lo pinta el sistema: al menos que no salga en blanco. */
