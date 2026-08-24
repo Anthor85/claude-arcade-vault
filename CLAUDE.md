@@ -79,6 +79,12 @@ Ampliar `GameAction` obliga a tocar también `ACTION_FACE` y `STEERING` en `comp
 - `/integrar-juego` — skill propia del repo (`.claude/skills/integrar-juego/`). Escribe la spec para integrar un juego nuevo sobre el contrato `GameEngine`, partiendo de una carpeta de `references/started-games/` o de una descripción. No implementa código. Su `plataforma.md` es el mapa de puntos de integración y el catálogo de criterios de aceptación.
 - `/spec` y `/spec-impl` — de `Klerith/fernando-skills` (`npx skills@latest add Klerith/fernando-skills`).
 
+## Agentes
+
+- `game-planner` — subagente propio del repo (`.claude/agents/game-planner.md`). Decide **qué** juego añadir: analiza el catálogo, los motores y el contrato `GameEngine`, y propone candidatos razonados. Mantiene su memoria de sugerencias (y de descartes) en `references/SUGERENCIAS_JUEGOS.MD`, el único fichero que escribe. Va antes de `/integrar-juego`; no escribe specs ni código.
+
 ## Flujo de trabajo
 
 Spec Driven Design. Para features nuevas: escribir primero la spec (con `/spec`, o `/integrar-juego` si es un juego), revisarla, cambiar su estado a **Aprobado** a mano —ese cambio lo hace el humano— y luego implementarla con `/spec-impl`. No codificar directamente.
+
+Para un juego nuevo el flujo empieza un paso antes: elegir el juego con el subagente `game-planner` → spec con `/integrar-juego` → aprobar a mano → `/spec-impl` → actualizar `references/IMPLEMENTED_GAMES.MD`.
