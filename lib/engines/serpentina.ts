@@ -5,7 +5,13 @@ import {
   type FruitName,
   type FruitSheet,
 } from "./serpentina-sprites";
-import type { GameAction, GameEngine, GameEvents, GameHandle } from "./types";
+import type {
+  GameAction,
+  GameEngine,
+  GameEvents,
+  GameHandle,
+  SkinId,
+} from "./types";
 
 /**
  * Serpentina — la serpiente de los Nokia, escrita desde cero contra el
@@ -51,11 +57,61 @@ const MAX_DT = 100;
 /** Giros que caben en la cola. Ver `enqueueTurn`. */
 const TURN_QUEUE_MAX = 2;
 
-const BACKGROUND = "#000";
-const GRID_LINE = "#101820";
-const SNAKE_BODY = "#39ff88";
-const SNAKE_HEAD = "#c8ffdd";
-const SNAKE_EDGE = "#0b3d24";
+// ---- Skins ----
+/**
+ * Una skin es solo paleta y forma de trazo. No toca geometría, hitboxes,
+ * tiempos ni puntuación: la partida se juega igual con cualquiera de las tres.
+ */
+type SerpentinaSkin = {
+  fondo: string;
+  /** Color de la rejilla, o `null` si esta skin no la pinta. */
+  rejilla: string | null;
+  cuerpo: string;
+  cabeza: string;
+  /** Trazo del borde de cada segmento: es lo que separa anillo de anillo. */
+  borde: string;
+  /**
+   * Tinte plano que se aplica sobre la fruta, o `null` para dejar la lámina
+   * con sus colores. Solo lo usa la paleta monocroma.
+   */
+  fruta: string | null;
+  /** Radio del halo de cabeza y fruta. `0` en las paletas planas. */
+  glow: number;
+};
+
+const SKINS: Record<SkinId, SerpentinaSkin> = {
+  // La paleta del port, byte a byte: verde neón sobre negro puro.
+  clasico: {
+    fondo: "#000",
+    rejilla: "#101820",
+    cuerpo: "#39ff88",
+    cabeza: "#c8ffdd",
+    borde: "#0b3d24",
+    fruta: null,
+    glow: 0,
+  },
+  // Fósforo ámbar de monitor CRT: un solo tono y la lectura la da el brillo.
+  // La fruta se tiñe porque un CRT monocromo no tiene un segundo color.
+  retro: {
+    fondo: "#0d0a04",
+    rejilla: "#2a1d06",
+    cuerpo: "#ffb000",
+    cabeza: "#ffe9c4",
+    borde: "#7a5200",
+    fruta: "#ffb000",
+    glow: 0,
+  },
+  // Saturado sobre fondo casi negro, rejilla visible y halo en cabeza y fruta.
+  neon: {
+    fondo: "#04040c",
+    rejilla: "rgba(0, 245, 255, 0.12)",
+    cuerpo: "#00f5ff",
+    cabeza: "#f5ff00",
+    borde: "#022a33",
+    fruta: null,
+    glow: 10,
+  },
+};
 
 /**
  * Cada acción táctil escribe en la tecla que usaría el teclado: `setInput` y
@@ -108,6 +164,10 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
 
   canvas.width = W;
   canvas.height = H;
+
+  // ---- Skin activa ----
+  // Solo la consulta el dibujado; nada del estado de juego la mira.
+  let skin: SerpentinaSkin = SKINS.clasico;
 
   // ---- Estado de la partida ----
   /** Cabeza en el índice 0, cola al final. */
@@ -304,7 +364,8 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
   // ---- Dibujo ----
 
   function drawGrid() {
-    ctx.strokeStyle = GRID_LINE;
+    if (!skin.rejilla) return;
+    ctx.strokeStyle = skin.rejilla;
     ctx.lineWidth = 1;
     for (let i = 1; i < CELLS; i++) {
       ctx.beginPath();
@@ -318,34 +379,105 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
     }
   }
 
-  /** La serpiente va con primitivas en verde neón: la lámina es solo fruta. */
+  /**
+   * La serpiente va con primitivas: la lámina es solo fruta. Las coordenadas
+   * son las mismas en las tres skins; lo único que cambia es el color y, en
+   * `neon`, el halo de la cabeza.
+   */
   function drawSnake() {
     for (let i = snake.length - 1; i >= 0; i--) {
       const seg = snake[i];
       const px = seg.x * CELL;
       const py = seg.y * CELL;
-      ctx.fillStyle = i === 0 ? SNAKE_HEAD : SNAKE_BODY;
+      const head = i === 0;
+      // El halo se aplica solo a la cabeza: son hasta cientos de segmentos y
+      // una sombra por `fillRect` de cuerpo hundiría los fps sin aportar nada.
+      if (head && skin.glow > 0) {
+        ctx.save();
+        ctx.shadowBlur = skin.glow;
+        ctx.shadowColor = skin.cabeza;
+      }
+      ctx.fillStyle = head ? skin.cabeza : skin.cuerpo;
       ctx.fillRect(px + 1, py + 1, CELL - 2, CELL - 2);
-      ctx.strokeStyle = SNAKE_EDGE;
+      ctx.strokeStyle = skin.borde;
       ctx.lineWidth = 1;
       ctx.strokeRect(px + 1.5, py + 1.5, CELL - 3, CELL - 3);
+      if (head && skin.glow > 0) ctx.restore();
     }
   }
 
+  // ---- Tinte de la fruta ----
+  /**
+   * Lado del lienzo auxiliar donde se tiñe la fruta. El doble de la celda
+   * porque `drawFruit` escala por el alto y las especies anchas se salen de
+   * `CELL`. Es un lienzo de dibujo: no define ninguna hitbox.
+   */
+  const TINT_TILE = CELL * 2;
+
+  /** Fruta ya teñida, cacheada por especie y color. Se re-tiñe casi nunca. */
+  let tinted: {
+    name: FruitName;
+    color: string;
+    sheeted: boolean;
+    canvas: HTMLCanvasElement;
+  } | null = null;
+
+  /**
+   * Devuelve la fruta teñida de plano con `color`, o `null` si el navegador no
+   * da contexto 2D al lienzo auxiliar (entonces se pinta sin teñir).
+   */
+  function tintedFruit(
+    name: FruitName,
+    color: string,
+  ): HTMLCanvasElement | null {
+    const sheeted = sheet !== null;
+    if (
+      tinted &&
+      tinted.name === name &&
+      tinted.color === color &&
+      tinted.sheeted === sheeted
+    ) {
+      return tinted.canvas;
+    }
+    const off = document.createElement("canvas");
+    off.width = TINT_TILE;
+    off.height = TINT_TILE;
+    const octx = off.getContext("2d");
+    if (!octx) return null;
+    drawFruit(octx, sheet, name, TINT_TILE / 2, TINT_TILE / 2, CELL);
+    // `source-in` pinta el color solo donde la fruta tiene píxel: la silueta
+    // se conserva y el fondo sigue transparente.
+    octx.globalCompositeOperation = "source-in";
+    octx.fillStyle = color;
+    octx.fillRect(0, 0, TINT_TILE, TINT_TILE);
+    tinted = { name, color, sheeted, canvas: off };
+    return off;
+  }
+
+  function drawTheFruit() {
+    if (!fruit) return;
+    const cx = fruit.x * CELL + CELL / 2;
+    const cy = fruit.y * CELL + CELL / 2;
+    const needsGlow = skin.glow > 0;
+    if (needsGlow) {
+      ctx.save();
+      ctx.shadowBlur = skin.glow;
+      ctx.shadowColor = skin.cuerpo;
+    }
+    const tile = skin.fruta ? tintedFruit(fruit.name, skin.fruta) : null;
+    if (tile) {
+      ctx.drawImage(tile, cx - TINT_TILE / 2, cy - TINT_TILE / 2);
+    } else {
+      drawFruit(ctx, sheet, fruit.name, cx, cy, CELL);
+    }
+    if (needsGlow) ctx.restore();
+  }
+
   function draw() {
-    ctx.fillStyle = BACKGROUND;
+    ctx.fillStyle = skin.fondo;
     ctx.fillRect(0, 0, W, H);
     drawGrid();
-    if (fruit) {
-      drawFruit(
-        ctx,
-        sheet,
-        fruit.name,
-        fruit.x * CELL + CELL / 2,
-        fruit.y * CELL + CELL / 2,
-        CELL,
-      );
-    }
+    drawTheFruit();
     drawSnake();
   }
 
@@ -430,8 +562,12 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
       if (!code) return;
       handleKey(code);
     },
-    /** Este motor todavía no tiene skins: solo declara `clasico`. */
-    setSkin() {},
+    setSkin(id) {
+      // Solo cambia la paleta. Repinta ya mismo para que el cambio se vea
+      // aunque el loop esté en pausa o la partida haya terminado.
+      skin = SKINS[id] ?? SKINS.clasico;
+      draw();
+    },
     destroy() {
       if (destroyed) return;
       destroyed = true;
@@ -444,7 +580,7 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
 export const serpentinaEngine: GameEngine = {
   width: W,
   height: H,
-  skins: ["clasico"],
+  skins: ["clasico", "retro", "neon"],
   hasLives: true,
   // El orden manda el de la cruceta táctil: `TouchPad` respeta este array.
   actions: ["left", "up", "down", "right"],
