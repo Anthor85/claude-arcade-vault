@@ -4,10 +4,12 @@ import {
   EXPLOSION_DURATION,
   EXPLOSION_FRAMES,
   loadSpritesheet,
+  SPRITES,
   type BrickColor,
+  type SpriteFrame,
   type Spritesheet,
 } from "./arkanoid-sprites";
-import type { GameEngine, GameEvents, GameHandle } from "./types";
+import type { GameEngine, GameEvents, GameHandle, SkinId } from "./types";
 
 /**
  * Port de `references/started-games/04-claude-arkanoid/game.js`.
@@ -54,22 +56,20 @@ const MULTIBALL_ANGLE = (30 * Math.PI) / 180; // desviación de las dos bolas nu
 // ---- Power-ups ----
 // `chance` es la probabilidad por bloque destruido; los tramos son excluyentes
 // (una sola tirada por bloque), así que suman 6,6 % y en el resto de casos no
-// cae nada. `text` es el color de la letra sobre el círculo.
+// cae nada. Los colores de la cápsula ya no viven aquí: son de la skin.
 type PowerupType = "life" | "long" | "multi" | "laser" | "skip";
 
 type PowerupDef = {
   letter: string;
-  color: string;
-  text: string;
   chance: number;
 };
 
 const POWERUPS: Record<PowerupType, PowerupDef> = {
-  life: { letter: "V", color: "#ff5fa8", text: "#3a0018", chance: 0.005 },
-  long: { letter: "B", color: "#12246b", text: "#dfe6ff", chance: 0.02 },
-  multi: { letter: "M", color: "#6fd4ff", text: "#04303f", chance: 0.02 },
-  laser: { letter: "L", color: "#9aa0a6", text: "#1a1c1e", chance: 0.02 },
-  skip: { letter: "P", color: "#ffd21e", text: "#3a2c00", chance: 0.001 },
+  life: { letter: "V", chance: 0.005 },
+  long: { letter: "B", chance: 0.02 },
+  multi: { letter: "M", chance: 0.02 },
+  laser: { letter: "L", chance: 0.02 },
+  skip: { letter: "P", chance: 0.001 },
 };
 
 const POWERUP_ORDER: readonly PowerupType[] = [
@@ -156,6 +156,218 @@ const SCORES: Record<BrickColor, number> = {
   gray: 100,
 };
 
+// ---- Skins ----
+/**
+ * Una skin es solo paleta y forma de dibujo. No toca geometría, hitboxes,
+ * tiempos ni puntuación: la partida se juega igual con las tres.
+ *
+ * El color de este juego vive dentro del PNG, así que teñir es lo caro: se
+ * hace **una vez por skin** sobre una lámina fuera de pantalla (`tintSheet`) y
+ * el resultado se cachea. En el frame solo se dibuja.
+ */
+type ArkanoidSkin = {
+  /** Fondo del canvas, o `null` para dejarlo transparente (marco CRT detrás). */
+  fondo: string | null;
+  /** Rejilla decorativa de fondo, o `null`. No marca ninguna unidad de juego. */
+  rejilla: string | null;
+  /** Tinte por color de bloque, o `null` para usar la lámina tal cual. */
+  tinte: Record<BrickColor, string> | null;
+  /** Tinte de la barra y de la bola; `null` = sin teñir. */
+  paddle: string | null;
+  bola: string | null;
+  /** Radio del halo. `0` en las paletas planas. */
+  glow: number;
+  powerup: Record<PowerupType, { color: string; text: string }>;
+  powerupBorde: string;
+};
+
+const SKINS: Record<SkinId, ArkanoidSkin> = {
+  // La lámina original sin teñir y las cápsulas del port, byte a byte.
+  clasico: {
+    fondo: null,
+    rejilla: null,
+    tinte: null,
+    paddle: null,
+    bola: null,
+    glow: 0,
+    powerup: {
+      life: { color: "#ff5fa8", text: "#3a0018" },
+      long: { color: "#12246b", text: "#dfe6ff" },
+      multi: { color: "#6fd4ff", text: "#04303f" },
+      laser: { color: "#9aa0a6", text: "#1a1c1e" },
+      skip: { color: "#ffd21e", text: "#3a2c00" },
+    },
+    powerupBorde: "rgba(255, 255, 255, 0.85)",
+  },
+  // Fósforo ámbar: un solo tono y la lectura la da el brillo, no el matiz.
+  retro: {
+    fondo: "#0d0a04",
+    rejilla: null,
+    tinte: {
+      red: "#ffb000",
+      hotpink: "#ffc46b",
+      magenta: "#ffd9a0",
+      yellow: "#ffe9c4",
+      green: "#c98a00",
+      cyan: "#9a6600",
+      gray: "#6f5a2e",
+    },
+    paddle: "#ffe9c4",
+    bola: "#ffd28a",
+    glow: 0,
+    powerup: {
+      life: { color: "#ffe9c4", text: "#3a2400" },
+      long: { color: "#c98a00", text: "#ffe9c4" },
+      multi: { color: "#ffb000", text: "#2a1c00" },
+      laser: { color: "#8a6a1e", text: "#ffe9c4" },
+      skip: { color: "#ffd28a", text: "#3a2400" },
+    },
+    powerupBorde: "rgba(255, 233, 196, 0.85)",
+  },
+  // Saturado sobre fondo casi negro, con halo y rejilla tenue.
+  neon: {
+    fondo: "#04040c",
+    rejilla: "rgba(0, 245, 255, 0.08)",
+    tinte: {
+      red: "#ff006e",
+      hotpink: "#ff4da6",
+      magenta: "#b026ff",
+      yellow: "#f5ff00",
+      green: "#00ff88",
+      cyan: "#00f5ff",
+      gray: "#7a8cff",
+    },
+    paddle: "#00f5ff",
+    bola: "#f5ff00",
+    glow: 8,
+    powerup: {
+      life: { color: "#ff006e", text: "#20000c" },
+      long: { color: "#00f5ff", text: "#001418" },
+      multi: { color: "#00ff88", text: "#00180d" },
+      laser: { color: "#b026ff", text: "#15002a" },
+      skip: { color: "#f5ff00", text: "#1a1c00" },
+    },
+    powerupBorde: "rgba(255, 255, 255, 0.9)",
+  },
+};
+
+/** Separación de la rejilla decorativa de `neon`, en px. */
+const GRID_STEP = 40;
+
+/** Margen del halo horneado en los mosaicos de bloque. Solo visual. */
+const GLOW_PAD = 6;
+
+/** Lámina teñida y mosaicos de bloque ya listos, cacheados por skin. */
+type SkinAssets = {
+  sheet: Spritesheet;
+  /** Un mosaico por color con el halo horneado, o `null` sin halo. */
+  tiles: Record<BrickColor, HTMLCanvasElement> | null;
+};
+
+/** Tamaño de la lámina: llega como canvas offscreen o como imagen. */
+function sheetSize(img: CanvasImageSource): { w: number; h: number } {
+  if (img instanceof HTMLCanvasElement) return { w: img.width, h: img.height };
+  if (img instanceof HTMLImageElement)
+    return { w: img.naturalWidth, h: img.naturalHeight };
+  return { w: 0, h: 0 };
+}
+
+/**
+ * Tiñe un recorte de la lámina al color pedido conservando el relieve del
+ * sprite: primero lo pasa a gris (`saturation`), luego lo multiplica por el
+ * color —así el color es el techo de luz y las sombras siguen siendo sombras—
+ * y por último recupera la máscara de transparencia con `destination-in`.
+ */
+function tintRegion(
+  o: CanvasRenderingContext2D,
+  src: CanvasImageSource,
+  f: SpriteFrame,
+  color: string,
+) {
+  o.save();
+  o.beginPath();
+  o.rect(f.sx, f.sy, f.sw, f.sh);
+  o.clip();
+
+  o.globalCompositeOperation = "saturation";
+  o.fillStyle = "#808080";
+  o.fillRect(f.sx, f.sy, f.sw, f.sh);
+
+  o.globalCompositeOperation = "multiply";
+  o.fillStyle = color;
+  o.fillRect(f.sx, f.sy, f.sw, f.sh);
+
+  o.globalCompositeOperation = "destination-in";
+  o.drawImage(src, f.sx, f.sy, f.sw, f.sh, f.sx, f.sy, f.sw, f.sh);
+
+  o.restore();
+}
+
+/** Copia de la lámina con bloques, explosiones, barra y bola ya teñidos. */
+function tintSheet(src: CanvasImageSource, skin: ArkanoidSkin): Spritesheet {
+  const { w, h } = sheetSize(src);
+  if (!w || !h) return null;
+
+  const off = document.createElement("canvas");
+  off.width = w;
+  off.height = h;
+  const o = off.getContext("2d");
+  if (!o) return null;
+  o.drawImage(src, 0, 0);
+
+  if (skin.tinte) {
+    for (const key of Object.keys(skin.tinte) as BrickColor[]) {
+      const color = skin.tinte[key];
+      tintRegion(o, src, SPRITES.blocks[key], color);
+      // El gris comparte recortes de explosión con el rojo: teñirlos otra vez
+      // pisaría los del rojo, así que se queda con la animación roja teñida.
+      if (key === "gray") continue;
+      for (const f of EXPLOSION_FRAMES[key]) tintRegion(o, src, f, color);
+    }
+  }
+  if (skin.paddle) tintRegion(o, src, SPRITES.paddle, skin.paddle);
+  if (skin.bola) tintRegion(o, src, SPRITES.ball, skin.bola);
+
+  return off;
+}
+
+/**
+ * Hornea un mosaico por color de bloque, ya escalado a BRICK_W×BRICK_H y con
+ * el halo dibujado alrededor. Se paga una vez por skin; en el frame el bloque
+ * es un solo `drawImage` sin `shadow*`, que es lo que salva los fps.
+ */
+function buildGlowTiles(
+  sheet: CanvasImageSource,
+  skin: ArkanoidSkin,
+): Record<BrickColor, HTMLCanvasElement> | null {
+  if (skin.glow <= 0 || !skin.tinte) return null;
+  const tiles = {} as Record<BrickColor, HTMLCanvasElement>;
+
+  for (const key of Object.keys(skin.tinte) as BrickColor[]) {
+    const tile = document.createElement("canvas");
+    tile.width = BRICK_W + GLOW_PAD * 2;
+    tile.height = BRICK_H + GLOW_PAD * 2;
+    const t = tile.getContext("2d");
+    if (!t) return null;
+    const f = SPRITES.blocks[key];
+    t.shadowBlur = skin.glow;
+    t.shadowColor = skin.tinte[key];
+    t.drawImage(
+      sheet,
+      f.sx,
+      f.sy,
+      f.sw,
+      f.sh,
+      GLOW_PAD,
+      GLOW_PAD,
+      BRICK_W,
+      BRICK_H,
+    );
+    tiles[key] = tile;
+  }
+  return tiles;
+}
+
 // ---- Tipos de estado ----
 /** `hits` = golpes restantes (1, o 2 en gris). */
 type Brick = {
@@ -185,6 +397,34 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
 
   /** Lámina de sprites; `null` hasta que carga, y también si la carga falla. */
   let sheet: Spritesheet = null;
+
+  // ---- Skin activa ----
+  // Solo la consulta el dibujado; nada del estado de juego la mira.
+  let skinId: SkinId = "clasico";
+  let skin: ArkanoidSkin = SKINS.clasico;
+
+  /** Lámina teñida y mosaicos por skin. Se construyen la primera vez que hacen falta. */
+  const assets = new Map<SkinId, SkinAssets>();
+
+  /**
+   * Material de dibujo de la skin activa. Con la lámina aún sin cargar, o con
+   * `clasico`, no hay nada que teñir: se usa la lámina cruda.
+   */
+  function skinAssets(): SkinAssets {
+    if (!sheet || (!skin.tinte && !skin.paddle && !skin.bola)) {
+      return { sheet, tiles: null };
+    }
+    const cached = assets.get(skinId);
+    if (cached) return cached;
+
+    const tinted = tintSheet(sheet, skin) ?? sheet;
+    const built: SkinAssets = {
+      sheet: tinted,
+      tiles: buildGlowTiles(tinted, skin),
+    };
+    assets.set(skinId, built);
+    return built;
+  }
 
   // ---- Estado ----
   let bricks: Brick[] = [];
@@ -423,38 +663,101 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
 
     for (const p of powerups) {
       const def = POWERUPS[p.type];
+      const paint = skin.powerup[p.type];
       const cx = p.x + r,
         cy = p.y + r;
 
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.fillStyle = def.color;
+      ctx.fillStyle = paint.color;
+      applyGlow(paint.color);
       ctx.fill();
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
+      ctx.strokeStyle = skin.powerupBorde;
       ctx.stroke();
+      ctx.shadowBlur = 0;
 
-      ctx.fillStyle = def.text;
+      ctx.fillStyle = paint.text;
       ctx.fillText(def.letter, cx, cy + 1);
     }
+    ctx.restore();
+  }
+
+  /** Halo de la skin `neon`. En las paletas planas no hace nada. */
+  function applyGlow(color: string) {
+    if (skin.glow <= 0) return;
+    ctx.shadowBlur = skin.glow;
+    ctx.shadowColor = color;
+  }
+
+  /** Rejilla decorativa de fondo. No marca casillas ni alinea nada del juego. */
+  function drawGrid() {
+    if (!skin.rejilla) return;
+    ctx.save();
+    ctx.strokeStyle = skin.rejilla;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let x = GRID_STEP; x < W; x += GRID_STEP) {
+      ctx.moveTo(x + 0.5, 0);
+      ctx.lineTo(x + 0.5, H);
+    }
+    for (let y = GRID_STEP; y < H; y += GRID_STEP) {
+      ctx.moveTo(0, y + 0.5);
+      ctx.lineTo(W, y + 0.5);
+    }
+    ctx.stroke();
     ctx.restore();
   }
 
   // ---- Render ----
   function draw() {
     ctx.clearRect(0, 0, W, H);
+    if (skin.fondo) {
+      ctx.fillStyle = skin.fondo;
+      ctx.fillRect(0, 0, W, H);
+    }
+    drawGrid();
+
+    const art = skinAssets();
 
     for (const b of bricks) {
       if (!b.alive) continue;
-      drawSprite(ctx, sheet, `block_${b.color}`, b.x, b.y, BRICK_W, BRICK_H);
+      const tile = art.tiles?.[b.color];
+      if (tile) {
+        // El halo va horneado en el mosaico: un `drawImage` y ningún `shadow*`.
+        ctx.drawImage(tile, b.x - GLOW_PAD, b.y - GLOW_PAD);
+      } else {
+        drawSprite(
+          ctx,
+          art.sheet,
+          `block_${b.color}`,
+          b.x,
+          b.y,
+          BRICK_W,
+          BRICK_H,
+        );
+      }
     }
 
-    drawExplosions();
+    drawExplosions(art.sheet);
     drawPowerups();
 
-    drawSprite(ctx, sheet, "paddle", paddle.x, PADDLE_Y, paddle.w, PADDLE_H);
+    // Barra y bolas son pocas: aquí el halo sí se aplica en vivo.
+    ctx.save();
+    if (skin.paddle) applyGlow(skin.paddle);
+    drawSprite(
+      ctx,
+      art.sheet,
+      "paddle",
+      paddle.x,
+      PADDLE_Y,
+      paddle.w,
+      PADDLE_H,
+    );
+    if (skin.bola) applyGlow(skin.bola);
     for (const b of balls) {
-      drawSprite(ctx, sheet, "ball", b.x, b.y, BALL_SIZE, BALL_SIZE);
+      drawSprite(ctx, art.sheet, "ball", b.x, b.y, BALL_SIZE, BALL_SIZE);
     }
+    ctx.restore();
   }
 
   /**
@@ -462,7 +765,7 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
    * Se mide contra el reloj interno, no contra `performance.now()`: en pausa la
    * animación se queda congelada en su fotograma.
    */
-  function drawExplosions() {
+  function drawExplosions(art: Spritesheet) {
     const frameTime = EXPLOSION_DURATION / 4;
 
     explosions = explosions.filter(
@@ -473,7 +776,7 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
       const frames = EXPLOSION_FRAMES[e.color];
       if (!frames) continue;
       const i = Math.min(3, Math.floor((elapsed - e.start) / frameTime));
-      drawFrame(ctx, sheet, frames[i], e.x, e.y, BRICK_W, BRICK_H);
+      drawFrame(ctx, art, frames[i], e.x, e.y, BRICK_W, BRICK_H);
     }
   }
 
@@ -763,8 +1066,14 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
       else if (action === "right") keys.right = down;
       else if (action === "fire" && down) launchBall();
     },
-    /** Este motor todavía no tiene skins: solo declara `clasico`. */
-    setSkin() {},
+    setSkin(id) {
+      // Solo cambia la paleta. El teñido se hace una vez y queda cacheado.
+      // Repinta ya mismo para que se vea aunque el loop esté en pausa o la
+      // partida haya terminado.
+      skinId = SKINS[id] ? id : "clasico";
+      skin = SKINS[skinId];
+      draw();
+    },
     destroy() {
       if (destroyed) return;
       destroyed = true;
@@ -780,7 +1089,7 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
 export const arkanoidEngine: GameEngine = {
   width: W,
   height: H,
-  skins: ["clasico"],
+  skins: ["clasico", "retro", "neon"],
   hasLives: true,
   actions: ["left", "right", "fire"],
   // Solo los controles del juego: la pausa la declara el reproductor, que es
