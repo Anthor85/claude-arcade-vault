@@ -83,6 +83,7 @@ Ampliar `GameAction` obliga a tocar también `ACTION_FACE` y `STEERING` en `comp
 
 - `game-planner` — subagente propio del repo (`.claude/agents/game-planner.md`). Decide **qué** juego añadir: analiza el catálogo, los motores y el contrato `GameEngine`, y propone candidatos razonados. Mantiene su memoria de sugerencias (y de descartes) en `references/SUGERENCIAS_JUEGOS.MD`, el único fichero que escribe. Va antes de `/integrar-juego`; no escribe specs ni código.
 - `game-jam` — subagente propio del repo (`.claude/agents/game-jam.md`). Dado un **tema**, elige tres juegos que encajen en el contrato `GameEngine` y escribe seis specs en Borrador: dos variantes rivales por juego, en `specs/game-jam/<game-id>/`. Trabaja de un tirón, sin preguntar; el humano revisa al final y se queda con una variante por juego. No implementa código.
+- `skin-designer` — subagente propio del repo (`.claude/agents/skin-designer.md`). Dado **un juego** con motor registrado, garantiza que tenga al menos tres skins: `clasico` (la paleta actual, por defecto), `retro` y `neon`. Audita primero y solo implementa lo que falte, incluido el mecanismo transversal: `SkinId`, `GameEngine.skins` y `GameHandle.setSkin` en `lib/engines/types.ts`, más el selector en `components/game-player.tsx` con persistencia en `localStorage`. Es el único agente que escribe código; regla dura: una skin solo cambia colores y dibujado, nunca geometría, hitboxes, tiempos ni puntuación. Mantiene su memoria en `references/GAMES_WITH_THEMES.MD`, el único `.md` que escribe.
 
 ## Flujo de trabajo
 
