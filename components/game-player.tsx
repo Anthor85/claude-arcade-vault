@@ -468,8 +468,47 @@ const ACTION_FACE: Record<GameAction, { glyph: string; label: string }> = {
   drop: { glyph: "⤓", label: "Caída instantánea" },
 };
 
-/** Dirección a la izquierda, acción a la derecha: reparto de máquina real. */
-const STEERING: readonly GameAction[] = ["up", "left", "right", "down"];
+/** Celdas de la cruceta, en el orden en que se reparten. */
+const DPAD_ORDER = ["up", "left", "right", "down"] as const;
+
+type DpadSlot = (typeof DPAD_ORDER)[number];
+
+/** Cada celda se coloca en su área de la rejilla 3×3 con su propia clase. */
+const SLOT_CLASS: Record<DpadSlot, string> = {
+  up: styles.slotUp,
+  left: styles.slotLeft,
+  right: styles.slotRight,
+  down: styles.slotDown,
+};
+
+/** Acciones que el jugador percibe como dirección, y celda que ocupan. */
+const DPAD_SLOT: Partial<Record<GameAction, DpadSlot>> = {
+  up: "up",
+  thrust: "up",
+  down: "down",
+  left: "left",
+  right: "right",
+};
+
+/**
+ * Reparte lo que declara el motor entre la cruceta y el grupo de acciones.
+ *
+ * Una celda solo la ocupa una acción: si un motor declarase a la vez `up` y
+ * `thrust` —hoy ninguno lo hace—, la celda superior es para `up` y `thrust`
+ * baja al grupo de acciones, como todo lo que no tiene celda.
+ */
+function splitActions(actions: readonly GameAction[]) {
+  const dpad: Partial<Record<DpadSlot, GameAction>> = {};
+  const acting: GameAction[] = [];
+
+  for (const action of actions) {
+    const slot = DPAD_SLOT[action];
+    if (slot && !dpad[slot]) dpad[slot] = action;
+    else acting.push(action);
+  }
+
+  return { dpad, acting };
+}
 
 type TouchPadProps = {
   actions: readonly GameAction[];
@@ -483,7 +522,7 @@ type TouchPadProps = {
  * input que probar.
  */
 function TouchPad({ actions, onInput }: TouchPadProps) {
-  const renderButton = (action: GameAction) => {
+  const renderButton = (action: GameAction, extraClass = "") => {
     const face = ACTION_FACE[action];
     const press = (down: boolean) => (e: ReactPointerEvent) => {
       // Sin esto el navegador roba el gesto para desplazar o seleccionar.
@@ -495,7 +534,7 @@ function TouchPad({ actions, onInput }: TouchPadProps) {
         key={action}
         type="button"
         aria-label={face.label}
-        className={`${styles.touchBtn} ${action === "fire" ? styles.touchFire : ""}`}
+        className={`${styles.touchBtn} ${action === "fire" ? styles.touchFire : ""} ${extraClass}`}
         onPointerDown={press(true)}
         onPointerUp={press(false)}
         onPointerCancel={press(false)}
@@ -507,13 +546,30 @@ function TouchPad({ actions, onInput }: TouchPadProps) {
     );
   };
 
-  const steering = actions.filter((a) => STEERING.includes(a));
-  const acting = actions.filter((a) => !STEERING.includes(a));
+  const { dpad, acting } = splitActions(actions);
 
   return (
     <div className={styles.touchPad}>
-      <div className={styles.touchGroup}>{steering.map(renderButton)}</div>
-      <div className={styles.touchGroup}>{acting.map(renderButton)}</div>
+      <div className={styles.touchDpad}>
+        {DPAD_ORDER.map((slot) => {
+          const action = dpad[slot];
+          // La celda que el motor no declara se queda vacía, no desaparece:
+          // así las direcciones que sí existen no cambian de sitio de un
+          // juego a otro. Es decoración, y ningún lector la anuncia.
+          return action ? (
+            renderButton(action, SLOT_CLASS[slot])
+          ) : (
+            <div
+              key={slot}
+              aria-hidden="true"
+              className={`${styles.touchSlot} ${SLOT_CLASS[slot]}`}
+            />
+          );
+        })}
+      </div>
+      <div className={styles.touchActions}>
+        {acting.map((action) => renderButton(action))}
+      </div>
     </div>
   );
 }
