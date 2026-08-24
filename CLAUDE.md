@@ -82,6 +82,7 @@ Ampliar `GameAction` obliga a tocar también `ACTION_FACE` y `STEERING` en `comp
 ## Agentes
 
 - `game-planner` — subagente propio del repo (`.claude/agents/game-planner.md`). Decide **qué** juego añadir: analiza el catálogo, los motores y el contrato `GameEngine`, y propone candidatos razonados. Mantiene su memoria de sugerencias (y de descartes) en `references/SUGERENCIAS_JUEGOS.MD`, el único fichero que escribe. Va antes de `/integrar-juego`; no escribe specs ni código.
+- `game-jam` — subagente propio del repo (`.claude/agents/game-jam.md`). Dado un **tema**, elige tres juegos que encajen en el contrato `GameEngine` y escribe seis specs en Borrador: dos variantes rivales por juego, en `specs/game-jam/<game-id>/`. Trabaja de un tirón, sin preguntar; el humano revisa al final y se queda con una variante por juego. No implementa código.
 
 ## Flujo de trabajo
 
