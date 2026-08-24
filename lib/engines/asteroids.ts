@@ -1,4 +1,10 @@
-import type { GameAction, GameEngine, GameEvents, GameHandle } from "./types";
+import type {
+  GameAction,
+  GameEngine,
+  GameEvents,
+  GameHandle,
+  SkinId,
+} from "./types";
 
 /**
  * Port de `references/started-games/02-claude-asteroids/game.js`.
@@ -55,10 +61,72 @@ const SHIELD_GRACE = 1; // invencibilidad tras absorber un impacto
 const POWERUP_DROP = 0.25; // probabilidad por tipo al destruir un asteroide
 
 const POWERUP_TYPES: readonly PowerUpType[] = ["triple", "shield"];
-const POWERUP_COLOR: Record<PowerUpType, string> = {
-  triple: "#4df3ff",
-  shield: "#ffd24d",
+
+// ── Skins ─────────────────────────────────────────────────────────────────────
+/**
+ * Una skin es solo paleta y forma de trazo. No toca geometría, hitboxes,
+ * tiempos ni puntuación: la partida se juega igual con cualquiera de las tres.
+ */
+type AsteroidsSkin = {
+  fondo: string;
+  nave: string;
+  asteroide: string;
+  bala: string;
+  llama: string;
+  escudo: string;
+  /** El rastro de partícula se apaga solo: el alfa lo pone quien dibuja. */
+  particula: (alpha: number) => string;
+  powerup: Record<PowerUpType, string>;
+  /** Radio del halo de trazo. `0` en las paletas planas. */
+  glow: number;
+  /** Rejilla de fondo, o `null` si esta skin no la pinta. */
+  rejilla: string | null;
 };
+
+const SKINS: Record<SkinId, AsteroidsSkin> = {
+  // La paleta original del prototipo, byte a byte: vector blanco sobre negro.
+  clasico: {
+    fondo: "#000",
+    nave: "#fff",
+    asteroide: "#fff",
+    bala: "#fff",
+    llama: "rgba(255, 130, 0, 0.85)",
+    escudo: "rgba(255, 210, 77, 0.8)",
+    particula: (a) => `rgba(255,255,255,${a.toFixed(2)})`,
+    powerup: { triple: "#4df3ff", shield: "#ffd24d" },
+    glow: 0,
+    rejilla: null,
+  },
+  // Fósforo ámbar de monitor CRT: un solo tono, la lectura la da el brillo.
+  retro: {
+    fondo: "#0d0a04",
+    nave: "#ffd28a",
+    asteroide: "#ffb000",
+    bala: "#ffe9c4",
+    llama: "rgba(255, 176, 0, 0.85)",
+    escudo: "rgba(255, 210, 138, 0.8)",
+    particula: (a) => `rgba(255,176,0,${a.toFixed(2)})`,
+    powerup: { triple: "#ffd28a", shield: "#c98a00" },
+    glow: 0,
+    rejilla: null,
+  },
+  // Saturado sobre fondo casi negro, con halo en los trazos y rejilla tenue.
+  neon: {
+    fondo: "#04040c",
+    nave: "#00f5ff",
+    asteroide: "#ff006e",
+    bala: "#f5ff00",
+    llama: "rgba(245, 255, 0, 0.9)",
+    escudo: "rgba(0, 255, 136, 0.85)",
+    particula: (a) => `rgba(0,245,255,${a.toFixed(2)})`,
+    powerup: { triple: "#00ff88", shield: "#ff006e" },
+    glow: 8,
+    rejilla: "rgba(0, 245, 255, 0.08)",
+  },
+};
+
+/** Separación de la rejilla decorativa de `neon`. No es una unidad de juego. */
+const GRID_STEP = 40;
 
 function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
   const context = canvas.getContext("2d");
@@ -67,6 +135,10 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
 
   canvas.width = W;
   canvas.height = H;
+
+  // ── Skin activa ─────────────────────────────────────────────────────────────
+  // Solo la consulta el dibujado; nada del estado de juego la mira.
+  let skin: AsteroidsSkin = SKINS.clasico;
 
   // ── Input ───────────────────────────────────────────────────────────────────
   const keys: Record<string, boolean> = {};
@@ -95,6 +167,16 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
     return val;
   }
 
+  /**
+   * Halo de la skin `neon`. Se llama una vez por entidad, siempre dentro de un
+   * `save()`/`restore()`, para no reasignar `shadow*` por vértice.
+   */
+  function applyGlow(color: string) {
+    if (skin.glow <= 0) return;
+    ctx.shadowBlur = skin.glow;
+    ctx.shadowColor = color;
+  }
+
   // ── Bullet ──────────────────────────────────────────────────────────────────
   class Bullet {
     x: number;
@@ -121,10 +203,13 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
     }
 
     draw() {
-      ctx.fillStyle = "#fff";
+      ctx.save();
+      ctx.fillStyle = skin.bala;
+      applyGlow(skin.bala);
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
       ctx.fill();
+      ctx.restore();
     }
   }
 
@@ -181,7 +266,8 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
       ctx.save();
       ctx.translate(this.x, this.y);
       ctx.rotate(this.rot);
-      ctx.strokeStyle = "#fff";
+      ctx.strokeStyle = skin.asteroide;
+      applyGlow(skin.asteroide);
       ctx.lineWidth = 1.5;
       ctx.lineJoin = "round";
       ctx.beginPath();
@@ -280,7 +366,8 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
       ctx.save();
       ctx.translate(this.x, this.y);
       ctx.rotate(this.angle);
-      ctx.strokeStyle = "#fff";
+      ctx.strokeStyle = skin.nave;
+      applyGlow(skin.nave);
       ctx.lineWidth = 1.5;
       ctx.lineJoin = "round";
 
@@ -299,7 +386,8 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
         ctx.moveTo(-8, -4);
         ctx.lineTo(-8 - rand(6, 14), 0);
         ctx.lineTo(-8, 4);
-        ctx.strokeStyle = "rgba(255, 130, 0, 0.85)";
+        ctx.strokeStyle = skin.llama;
+        applyGlow(skin.llama);
         ctx.stroke();
       }
 
@@ -312,7 +400,8 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
 
       ctx.save();
       ctx.translate(this.x, this.y);
-      ctx.strokeStyle = "rgba(255, 210, 77, 0.8)";
+      ctx.strokeStyle = skin.escudo;
+      applyGlow(skin.escudo);
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(0, 0, this.radius + 9, 0, Math.PI * 2);
@@ -351,7 +440,7 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
 
     draw() {
       const alpha = this.ttl / this.life;
-      ctx.strokeStyle = `rgba(255,255,255,${alpha.toFixed(2)})`;
+      ctx.strokeStyle = skin.particula(alpha);
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(this.x, this.y);
@@ -394,12 +483,13 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
       // Parpadeo en los últimos segundos antes de expirar
       if (this.ttl < 3 && Math.floor(this.ttl * 6) % 2 === 0) return;
 
-      const color = POWERUP_COLOR[this.type];
+      const color = skin.powerup[this.type];
 
       ctx.save();
       ctx.translate(this.x, this.y);
       ctx.rotate(this.rot);
       ctx.strokeStyle = color;
+      applyGlow(color);
       ctx.lineWidth = 1.5;
       ctx.lineJoin = "round";
 
@@ -417,6 +507,7 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
       ctx.save();
       ctx.translate(this.x, this.y);
       ctx.strokeStyle = color;
+      applyGlow(color);
       ctx.lineWidth = 1.5;
       if (this.type === "triple") this.drawIconTriple();
       else this.drawIconShield();
@@ -635,14 +726,37 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
 
   // ── Draw ────────────────────────────────────────────────────────────────────
   function draw() {
-    ctx.fillStyle = "#000";
+    ctx.fillStyle = skin.fondo;
     ctx.fillRect(0, 0, W, H);
+    drawGrid();
 
     particles.forEach((p) => p.draw());
     asteroids.forEach((a) => a.draw());
     powerups.forEach((p) => p.draw());
     bullets.forEach((b) => b.draw());
     ship.draw();
+  }
+
+  /**
+   * Rejilla decorativa de fondo. Es puro adorno de la skin `neon`: no marca
+   * casillas ni alinea nada del juego.
+   */
+  function drawGrid() {
+    if (!skin.rejilla) return;
+    ctx.save();
+    ctx.strokeStyle = skin.rejilla;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let x = GRID_STEP; x < W; x += GRID_STEP) {
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, H);
+    }
+    for (let y = GRID_STEP; y < H; y += GRID_STEP) {
+      ctx.moveTo(0, y);
+      ctx.lineTo(W, y);
+    }
+    ctx.stroke();
+    ctx.restore();
   }
 
   // ── Loop principal ──────────────────────────────────────────────────────────
@@ -703,6 +817,12 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
         keys[code] = false;
       }
     },
+    setSkin(id) {
+      // Solo cambia la paleta. Repinta ya mismo para que el cambio se vea
+      // aunque el loop esté en pausa o la partida haya terminado.
+      skin = SKINS[id] ?? SKINS.clasico;
+      draw();
+    },
     destroy() {
       if (destroyed) return;
       destroyed = true;
@@ -718,6 +838,7 @@ export const asteroidsEngine: GameEngine = {
   height: H,
   hasLives: true,
   actions: ["left", "right", "thrust", "fire"],
+  skins: ["clasico", "retro", "neon"],
   // Solo los controles del juego: la pausa la declara el reproductor, que es
   // quien la escucha.
   controls: [

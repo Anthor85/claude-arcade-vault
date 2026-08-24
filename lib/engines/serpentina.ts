@@ -430,6 +430,8 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
       if (!code) return;
       handleKey(code);
     },
+    /** Este motor todavía no tiene skins: solo declara `clasico`. */
+    setSkin() {},
     destroy() {
       if (destroyed) return;
       destroyed = true;
@@ -442,6 +444,7 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
 export const serpentinaEngine: GameEngine = {
   width: W,
   height: H,
+  skins: ["clasico"],
   hasLives: true,
   // El orden manda el de la cruceta táctil: `TouchPad` respeta este array.
   actions: ["left", "up", "down", "right"],
