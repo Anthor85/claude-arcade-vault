@@ -6,17 +6,67 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Arcade Vault — plataforma para jugar online y competir por puntuación. Actualmente el repo es el scaffold inicial de Next.js (solo `app/layout.tsx` + `app/page.tsx`); la funcionalidad de arcade aún no existe.
+Arcade Vault — plataforma para jugar online y competir por puntuación. Next.js 16 (App Router) + Supabase. Hay autenticación real, puntuaciones persistentes y Salón de la Fama. Los juegos jugables están reflejados en el archivo .\references\IMPLEMENTED_GAMES.MD
 
 No hay framework de tests configurado. Si se añade uno, documentar aquí cómo ejecutar un test individual.
+
+## Comandos
+
+```bash
+npm run dev          # next dev (reescribe el bloque nextjs-agent-rules en AGENTS.md)
+npm run build        # next build
+npm run start        # next start (requiere build previo)
+npm run lint         # eslint (flat config, sin argumentos)
+npm run format       # prettier --write .
+npm run format:check # prettier --check .
+```
+
+## Estructura
+
+- `app/` — rutas: `/` (landing), `/juegos` (biblioteca), `/juegos/[id]` (detalle), `/juegos/[id]/jugar` (reproductor), `/salon` (Salón de la Fama), `/acceso` (login/registro), `/acerca` (about + contacto). Server Actions en `actions.ts` junto a su ruta.
+- `components/` — nav, footer, `session-provider`, `game-player` (marco CRT genérico), `hall-of-fame`, `auth-form`, `contact-form`, tarjetas y decoraciones de home.
+- `lib/engines/` — motores de juego y su contrato.
+- `lib/games.ts` — catálogo (ficha, textos, categoría, color, clase `cover-<slug>`).
+- `lib/supabase/` — clientes browser/server, lectura de sesión y tipos.
+- `lib/scores-db.ts` — ranking desde la vista `hall_of_fame`.
+- `proxy.ts` — refresco de la cookie de sesión (en Next 16 el Middleware se llama **Proxy**; la doc de `@supabase/ssr` sigue diciendo `middleware.ts`).
+- `supabase/migrations/` — esquema versionado (`profiles`, `scores`, vista `hall_of_fame`, RLS).
+- `specs/` — specs numeradas 01–08, con su estado en la cabecera.
+- `references/` — prototipo original y `started-games/` (juegos sueltos pendientes de portar).
+
+## Motores de juego
+
+Todo juego implementa el contrato `GameEngine` de `lib/engines/types.ts` y se registra en `lib/engines/index.ts` con **carga diferida** (`import()`), para que ningún motor viaje en el bundle de otras rutas. Motores actuales: `asteroides`, `caida` (Tetris), `arkanoid`, `serpentina`.
+
+Invariantes del contrato (están comentados en `types.ts`, respetarlos):
+
+- Importar el módulo no tiene efectos secundarios; todo arranca en `mount`.
+- El motor solo pinta en su `<canvas>`: HUD, overlays, pausa y modal de fin son de `components/game-player.tsx`.
+- Los listeners los registra `mount` y los quita `destroy`.
+- Los eventos (`onScore`, `onLives`, `onLevel`) se emiten al **cambiar** el valor, no por frame.
+- Tras `onGameOver` el motor deja de simular hasta un `restart`.
+
+Ampliar `GameAction` obliga a tocar también `ACTION_FACE` y `STEERING` en `components/game-player.tsx`.
+
+## Supabase
+
+- Auth por email + contraseña. **`Confirm email` desactivado** en el panel (no vive en el repo).
+- Autorización = políticas RLS; el código de la app no filtra por usuario a mano.
+- Usar `getUser()` (valida el token), nunca `getSession()`.
+- Solo claves públicas (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`). Nunca `service_role` en el repo ni en `.env.local` del cliente.
+- MCP de Supabase declarado en `.mcp.json` (habilitado en `.claude/settings.local.json`).
+- Variables de entorno documentadas en `.env.template`; `.env.local` no se versiona. Resend (`RESEND_API_KEY`, `CONTACT_FROM`, `CONTACT_TO`) alimenta el formulario de `/acerca`.
 
 ## Stack y convenciones
 
 - **Next.js 16 + React 19, App Router.** Ver AGENTS.md: esta versión tiene breaking changes respecto al conocimiento previo — consultar `node_modules/next/dist/docs/01-app/` antes de escribir código de routing, layouts, data fetching o server actions.
-- **Tipos de rutas generados.** El layout usa `LayoutProps<"/">` como tipo global (sin import). Next genera estos tipos en `.next/types`; están incluidos vía `tsconfig.json`. Usar `PageProps<...>`/`LayoutProps<...>` en lugar de declarar props a mano.
-- **Tailwind v4** vía `@tailwindcss/postcss`. Sin `tailwind.config`: los tokens de diseño se declaran en `app/globals.css` con `@theme inline` sobre variables CSS de `:root` (incluye modo oscuro por `prefers-color-scheme`).
+- **Tipos de rutas generados.** Usar `PageProps<...>` / `LayoutProps<...>` como tipos globales (sin import) en lugar de declarar props a mano. Next los genera en `.next/types`, incluidos vía `tsconfig.json`.
+- **Tailwind v4** vía `@tailwindcss/postcss`. Sin `tailwind.config`: los tokens se declaran en `app/globals.css` con `@theme inline` sobre variables CSS de `:root`.
+- **Estilos:** utilidades de Tailwind + clases globales del tema arcade en `app/globals.css` (`av-*`, `cover-*`) + **CSS Modules** por pantalla (`components/*.module.css`) para lo que es propio de una vista.
+- **Tipografías** cargadas con `next/font/google` en `app/layout.tsx`: Press Start 2P (`--font-pixel`), JetBrains Mono y Courier Prime (`--font-mono`).
 - **Alias de imports:** `@/*` → raíz del proyecto.
 - TypeScript en modo `strict`.
+- Código, comentarios y specs **en español**.
 
 ## Formato y lint
 
@@ -25,8 +75,10 @@ No hay framework de tests configurado. Si se añade uno, documentar aquí cómo 
 
 ## Skills
 
-Usa siempre /frontend-design para diseñar interfaces de usuario.
+- `/frontend-design` — usar siempre para diseñar interfaces de usuario.
+- `/integrar-juego` — skill propia del repo (`.claude/skills/integrar-juego/`). Escribe la spec para integrar un juego nuevo sobre el contrato `GameEngine`, partiendo de una carpeta de `references/started-games/` o de una descripción. No implementa código. Su `plataforma.md` es el mapa de puntos de integración y el catálogo de criterios de aceptación.
+- `/spec` y `/spec-impl` — de `Klerith/fernando-skills` (`npx skills@latest add Klerith/fernando-skills`).
 
 ## Flujo de trabajo
 
-El proyecto sigue Spec Driven Design usando las skills `/spec` y `/spec-impl` (de `Klerith/fernando-skills`). Para features nuevas, escribir primero la spec con `/spec` y luego implementarla con `/spec-impl` en vez de codificar directamente.
+Spec Driven Design. Para features nuevas: escribir primero la spec (con `/spec`, o `/integrar-juego` si es un juego), revisarla, cambiar su estado a **Aprobado** a mano —ese cambio lo hace el humano— y luego implementarla con `/spec-impl`. No codificar directamente.
