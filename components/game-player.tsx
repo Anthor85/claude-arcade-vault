@@ -200,7 +200,7 @@ export function GamePlayer({ game }: { game: Game }) {
   return (
     <div className="av-player fade-in">
       <div className="player-hud">
-        <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+        <div className="hud-stats">
           <div className="hud-stat">
             <div className="l">Jugador</div>
             <div className="v" style={{ color: "var(--ink)" }}>
@@ -221,45 +221,6 @@ export function GamePlayer({ game }: { game: Game }) {
             <div className="l">Nivel</div>
             <div className="v">{String(level).padStart(2, "0")}</div>
           </div>
-        </div>
-        <div className="hud-actions">
-          {meta && meta.skins.length > 1 && (
-            <label className={styles.skinField}>
-              <span className={styles.skinLabel}>SKIN</span>
-              <select
-                className={styles.skinSelect}
-                value={skin}
-                onChange={(e) => changeSkin(e.target.value as SkinId)}
-              >
-                {meta.skins.map((id) => (
-                  <option key={id} value={id}>
-                    {SKIN_LABEL[id]}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          <button
-            type="button"
-            className="btn yellow icon"
-            onClick={togglePause}
-            disabled={over || status === "loading"}
-            aria-label={paused ? "Reanudar" : "Pausa"}
-            title={paused ? "Reanudar (P)" : "Pausa (P)"}
-          >
-            <PauseGlyph paused={paused} />
-          </button>
-          <button
-            type="button"
-            className="btn magenta"
-            onClick={endGame}
-            disabled={over || status === "loading"}
-          >
-            FIN
-          </button>
-          <Link href={`/juegos/${game.id}`} className="btn ghost">
-            SALIR
-          </Link>
         </div>
       </div>
 
@@ -324,6 +285,46 @@ export function GamePlayer({ game }: { game: Game }) {
       </div>
 
       {meta && <ControlPanel controls={meta.controls} />}
+
+      <div className="hud-actions">
+        {meta && meta.skins.length > 1 && (
+          <label className={styles.skinField}>
+            <span className={styles.skinLabel}>SKIN</span>
+            <select
+              className={styles.skinSelect}
+              value={skin}
+              onChange={(e) => changeSkin(e.target.value as SkinId)}
+            >
+              {meta.skins.map((id) => (
+                <option key={id} value={id}>
+                  {SKIN_LABEL[id]}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        <button
+          type="button"
+          className="btn yellow icon"
+          onClick={togglePause}
+          disabled={over || status === "loading"}
+          aria-label={paused ? "Reanudar" : "Pausa"}
+          title={paused ? "Reanudar (P)" : "Pausa (P)"}
+        >
+          <PauseGlyph paused={paused} />
+        </button>
+        <button
+          type="button"
+          className="btn magenta"
+          onClick={endGame}
+          disabled={over || status === "loading"}
+        >
+          FIN
+        </button>
+        <Link href={`/juegos/${game.id}`} className="btn ghost">
+          SALIR
+        </Link>
+      </div>
 
       {over && (
         <div className="modal-bd">

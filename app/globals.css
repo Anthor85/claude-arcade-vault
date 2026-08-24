@@ -1129,12 +1129,25 @@ a {
 }
 
 /* ===== player ===== */
+/* El reproductor es una rejilla de cuatro bandas. En escritorio la primera se
+   parte en dos —datos y botones de servicio— y las tres siguientes ocupan el
+   ancho entero; en táctil las cuatro se apilan y los botones de servicio bajan
+   al pie. Las áreas `pad` y `panel` las reclaman `.touchPad` y `.panel` desde
+   `components/player.module.css`. */
 .av-player {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "hud     actions"
+    "screen  screen "
+    "pad     pad    "
+    "panel   panel  ";
   max-width: 1100px;
   margin: 32px auto;
   padding: 0 24px 64px;
 }
 .player-hud {
+  grid-area: hud;
   display: flex;
   gap: 16px;
   align-items: center;
@@ -1143,6 +1156,13 @@ a {
   border: 1px solid var(--line);
   background: var(--bg-2);
   margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+/* Los cuatro datos del HUD, en su propia caja: cuando la fila envuelve, lo
+   hace este grupo entero y no los rótulos sueltos. */
+.hud-stats {
+  display: flex;
+  gap: 24px;
   flex-wrap: wrap;
 }
 .hud-stat {
@@ -1171,13 +1191,25 @@ a {
   color: var(--yellow);
   text-shadow: 0 0 6px rgba(245, 255, 0, 0.5);
 }
+/* Fuera de `.player-hud` desde que el orden del DOM manda en táctil, pero en
+   escritorio la rejilla la vuelve a poner a su lado: mismo marco, mismo fondo
+   y mismo alto, con la junta central suprimida para que las dos cajas se lean
+   como la barra única de siempre. */
 .hud-actions {
+  grid-area: actions;
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 10px;
+  padding: 14px 18px;
+  border: 1px solid var(--line);
+  border-left: 0;
+  background: var(--bg-2);
+  margin-bottom: 18px;
 }
 
 .crt {
+  grid-area: screen;
   position: relative;
   border-radius: 28px;
   background: #050507;

@@ -46,6 +46,7 @@
    representa algo que la mano toca. */
 
 .panel {
+  grid-area: panel;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -125,6 +126,7 @@
    izquierda, acción a la derecha. */
 
 .touchPad {
+  grid-area: pad;
   display: none;
 }
 
