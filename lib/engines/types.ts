@@ -12,7 +12,12 @@
  * - Los eventos se emiten solo cuando el valor **cambia**, no en cada frame.
  * - Tras `onGameOver` el motor deja de simular y no vuelve a emitir hasta un
  *   `restart`.
+ * - La skin solo afecta al dibujado: no toca geometría, hitboxes, tiempos ni
+ *   puntuación. Una partida se juega igual con cualquier skin.
  */
+
+/** Paletas que puede declarar un motor. `clasico` es siempre el valor por defecto. */
+export type SkinId = "clasico" | "retro" | "neon";
 
 /** Acciones que el reproductor puede inyectar desde controles táctiles. */
 export type GameAction =
@@ -48,6 +53,11 @@ export type GameHandle = {
   end: () => void;
   /** Traduce un control táctil al mismo estado que una tecla mantenida. */
   setInput: (action: GameAction, down: boolean) => void;
+  /**
+   * Cambia la paleta **sin desmontar** y repinta de inmediato, aunque la
+   * partida esté en pausa o terminada. No altera el estado de juego.
+   */
+  setSkin: (skin: SkinId) => void;
   /** Para el loop y suelta los listeners. Idempotente. */
   destroy: () => void;
 };
@@ -68,5 +78,10 @@ export type GameEngine = {
   actions: readonly GameAction[];
   /** Ayuda de teclado que se muestra bajo el marco CRT. */
   controls: readonly GameControlHint[];
+  /**
+   * Paletas disponibles. Siempre incluye `"clasico"`, que es la de por defecto.
+   * Con una sola entrada el reproductor no pinta selector.
+   */
+  skins: readonly SkinId[];
   mount: (canvas: HTMLCanvasElement, events: GameEvents) => GameHandle;
 };

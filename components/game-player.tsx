@@ -23,9 +23,40 @@ import type {
   GameControlHint,
   GameEvents,
   GameHandle,
+  SkinId,
 } from "@/lib/engines/types";
 
 const START_LIVES = 3;
+
+/** Nombre de cada paleta en el selector del HUD. */
+const SKIN_LABEL: Record<SkinId, string> = {
+  clasico: "CLÁSICO",
+  retro: "RETRO",
+  neon: "NEÓN",
+};
+
+/** La skin elegida sobrevive a la recarga, y se guarda por juego. */
+const skinKey = (gameId: string) => `arcade-vault:skin:${gameId}`;
+
+/** `localStorage` no existe en el render del servidor: siempre con guarda. */
+function readStoredSkin(gameId: string): SkinId | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(skinKey(gameId));
+    return raw === "clasico" || raw === "retro" || raw === "neon" ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+function storeSkin(gameId: string, skin: SkinId) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(skinKey(gameId), skin);
+  } catch {
+    /* almacenamiento no disponible: la elecciÃ³n solo dura esta sesiÃ³n */
+  }
+}
 
 /** La pausa es de la plataforma, no del juego: la declara el reproductor. */
 const PAUSE_HINT: GameControlHint = { keys: "P / ESC", label: "PAUSA" };
@@ -36,13 +67,16 @@ type EngineMeta = {
   actions: readonly GameAction[];
   /** Si es `false`, el HUD no pinta el campo `Vidas`. */
   hasLives: boolean;
+  /** Paletas que declara el motor. Con una sola no se pinta selector. */
+  skins: readonly SkinId[];
 };
 
 type PlayerStatus = "loading" | "playing" | "paused" | "over";
 
 export function GamePlayer({ game }: { game: Game }) {
   const { user } = useSession();
-  const engine = hasEngine(game.id);
+  const gameId = game.id;
+  const engine = hasEngine(gameId);
 
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(START_LIVES);
@@ -55,6 +89,8 @@ export function GamePlayer({ game }: { game: Game }) {
   const [run, setRun] = useState(0);
   /** Lo que el motor declara de sí mismo, una vez cargado. */
   const [meta, setMeta] = useState<EngineMeta | null>(null);
+  /** Paleta activa. Es puro aspecto: no entra en la simulación. */
+  const [skin, setSkin] = useState<SkinId>("clasico");
 
   /** Mando a distancia del motor mientras el juego vive. */
   const handleRef = useRef<GameHandle | null>(null);
@@ -75,13 +111,30 @@ export function GamePlayer({ game }: { game: Game }) {
     setStatus("over");
   }, []);
 
-  const handleReady = useCallback((engineMeta: EngineMeta) => {
-    // Si el motor termina de cargar con la pestaña en segundo plano, la partida
-    // no empieza a correr sin que nadie la mire.
-    const hidden = document.hidden;
-    setMeta(engineMeta);
-    setStatus((s) => (s === "loading" ? (hidden ? "paused" : "playing") : s));
-  }, []);
+  const handleReady = useCallback(
+    (engineMeta: EngineMeta) => {
+      // Si el motor termina de cargar con la pestaña en segundo plano, la
+      // partida no empieza a correr sin que nadie la mire.
+      const hidden = document.hidden;
+      setMeta(engineMeta);
+      setStatus((s) => (s === "loading" ? (hidden ? "paused" : "playing") : s));
+      // La elección de la sesión anterior se reaplica sobre el motor ya
+      // montado: cambiar de paleta nunca remonta el canvas.
+      const stored = readStoredSkin(gameId);
+      if (stored && engineMeta.skins.includes(stored)) {
+        setSkin(stored);
+        handleRef.current?.setSkin(stored);
+      }
+    },
+    [gameId],
+  );
+
+  /** Cambiar de paleta no toca la partida: solo repinta con otros colores. */
+  const changeSkin = (id: SkinId) => {
+    setSkin(id);
+    storeSkin(gameId, id);
+    handleRef.current?.setSkin(id);
+  };
 
   /** Los controles táctiles escriben en el mismo mapa de teclas del motor. */
   const setInput = useCallback((action: GameAction, down: boolean) => {
@@ -170,6 +223,22 @@ export function GamePlayer({ game }: { game: Game }) {
           </div>
         </div>
         <div className="hud-actions">
+          {meta && meta.skins.length > 1 && (
+            <label className={styles.skinField}>
+              <span className={styles.skinLabel}>SKIN</span>
+              <select
+                className={styles.skinSelect}
+                value={skin}
+                onChange={(e) => changeSkin(e.target.value as SkinId)}
+              >
+                {meta.skins.map((id) => (
+                  <option key={id} value={id}>
+                    {SKIN_LABEL[id]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <button
             type="button"
             className="btn yellow icon"
@@ -331,6 +400,7 @@ function CanvasArena({
         controls: engine.controls,
         actions: engine.actions,
         hasLives: engine.hasLives,
+        skins: engine.skins,
       });
     });
 

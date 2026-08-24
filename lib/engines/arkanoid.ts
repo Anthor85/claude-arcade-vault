@@ -763,6 +763,8 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
       else if (action === "right") keys.right = down;
       else if (action === "fire" && down) launchBall();
     },
+    /** Este motor todavía no tiene skins: solo declara `clasico`. */
+    setSkin() {},
     destroy() {
       if (destroyed) return;
       destroyed = true;
@@ -778,6 +780,7 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
 export const arkanoidEngine: GameEngine = {
   width: W,
   height: H,
+  skins: ["clasico"],
   hasLives: true,
   actions: ["left", "right", "fire"],
   // Solo los controles del juego: la pausa la declara el reproductor, que es

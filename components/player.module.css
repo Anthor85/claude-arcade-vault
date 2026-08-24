@@ -188,3 +188,65 @@
   background: rgba(255, 0, 110, 0.18);
   box-shadow: inset 0 0 12px rgba(255, 0, 110, 0.5);
 }
+
+/* ── Selector de skin ────────────────────────────────────────────────────────
+   Vive en `hud-actions`, junto a PAUSA / FIN / SALIR, y habla el mismo idioma
+   que el resto del bisel: caja oscura, borde cian tenue y tipografía pixelada.
+   Solo se pinta si el motor declara más de una paleta. */
+.skinField {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.skinLabel {
+  color: var(--ink-faint);
+  font-family: var(--pixel);
+  font-size: 7px;
+  letter-spacing: 0.12em;
+}
+
+.skinSelect {
+  appearance: none;
+  padding: 7px 26px 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background-color: rgba(10, 10, 15, 0.7);
+  /* Punta de flecha dibujada a mano: no depende del widget del sistema. */
+  background-image:
+    linear-gradient(
+      45deg,
+      transparent 50%,
+      var(--cyan) 50%,
+      var(--cyan) 62%,
+      transparent 62%
+    ),
+    linear-gradient(
+      -45deg,
+      transparent 50%,
+      var(--cyan) 50%,
+      var(--cyan) 62%,
+      transparent 62%
+    );
+  background-repeat: no-repeat;
+  background-position:
+    right 14px center,
+    right 9px center;
+  background-size: 6px 6px;
+  color: var(--cyan);
+  font-family: var(--pixel);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.skinSelect:focus-visible {
+  outline: 1px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+/* El desplegable abierto lo pinta el sistema: al menos que no salga en blanco. */
+.skinSelect option {
+  background: var(--bg-2);
+  color: var(--ink);
+}

@@ -506,6 +506,8 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
       if (!code) return;
       handleKey(code);
     },
+    /** Este motor todavía no tiene skins: solo declara `clasico`. */
+    setSkin() {},
     destroy() {
       if (destroyed) return;
       destroyed = true;
@@ -518,6 +520,7 @@ function mount(canvas: HTMLCanvasElement, events: GameEvents): GameHandle {
 export const tetrisEngine: GameEngine = {
   width: W, // 300 de tablero + 120 de columna lateral
   height: H,
+  skins: ["clasico"],
   hasLives: false,
   actions: ["left", "right", "down", "rotate"],
   // Solo los controles del juego: la pausa la declara el reproductor, que es
