@@ -1154,6 +1154,8 @@ a {
   justify-content: space-between;
   padding: 14px 18px;
   border: 1px solid var(--line);
+  /* La mitad derecha de la barra es `.hud-actions`: entre las dos no hay junta. */
+  border-right: 0;
   background: var(--bg-2);
   margin-bottom: 18px;
   flex-wrap: wrap;
@@ -1206,6 +1208,63 @@ a {
   border-left: 0;
   background: var(--bg-2);
   margin-bottom: 18px;
+}
+
+/* Puntero grueso: las cuatro bandas se apilan y los botones de servicio bajan
+   al pie, donde ya estaban en el DOM. La condición es el tipo de puntero y no
+   el ancho: una ventana estrecha en escritorio sigue teniendo teclado, y una
+   tableta de 900 px no debería enseñar la barra de escritorio con mando. */
+@media (pointer: coarse) {
+  .av-player {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "hud"
+      "screen"
+      "pad"
+      "actions";
+  }
+  /* Al dejar de compartir fila con el HUD recupera su borde izquierdo, y el
+     hueco pasa de estar debajo a estar encima. */
+  .hud-actions {
+    border-left: 1px solid var(--line);
+    margin-top: 14px;
+    margin-bottom: 0;
+  }
+  /* Apilado: cada caja vuelve a cerrar su marco por los cuatro lados. */
+  .player-hud {
+    border-right: 1px solid var(--line);
+  }
+
+  /* En táctil el HUD sube a tocar la cabecera y se reduce a una sola línea:
+     puntuación, vidas y nivel. El nombre del jugador sobra —ya lo sabe quien
+     juega— y es lo único que obliga a la fila a envolver. */
+  .av-player {
+    margin-top: 8px;
+  }
+  .player-hud {
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    flex-wrap: nowrap;
+  }
+  .hud-stat.player {
+    display: none;
+  }
+  .hud-stats {
+    width: 100%;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  /* Rótulo y valor en la misma línea para que las tres cajas quepan a lo ancho. */
+  .hud-stat {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+  }
+  .hud-stat .v {
+    font-size: 13px;
+  }
 }
 
 .crt {

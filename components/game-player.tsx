@@ -201,7 +201,7 @@ export function GamePlayer({ game }: { game: Game }) {
     <div className="av-player fade-in">
       <div className="player-hud">
         <div className="hud-stats">
-          <div className="hud-stat">
+          <div className="hud-stat player">
             <div className="l">Jugador</div>
             <div className="v" style={{ color: "var(--ink)" }}>
               {playerName}
@@ -243,9 +243,6 @@ export function GamePlayer({ game }: { game: Game }) {
               onLives={setLives}
             />
           )}
-          {meta && status === "playing" && (
-            <TouchPad actions={meta.actions} onInput={setInput} />
-          )}
           {status === "loading" && (
             <div className="crt-content" style={{ zIndex: 5 }}>
               <div className="pixel neon-cyan" style={{ fontSize: 16 }}>
@@ -284,25 +281,17 @@ export function GamePlayer({ game }: { game: Game }) {
         </div>
       </div>
 
+      {meta && (
+        <TouchPad
+          actions={meta.actions}
+          onInput={setInput}
+          disabled={status !== "playing"}
+        />
+      )}
+
       {meta && <ControlPanel controls={meta.controls} />}
 
       <div className="hud-actions">
-        {meta && meta.skins.length > 1 && (
-          <label className={styles.skinField}>
-            <span className={styles.skinLabel}>SKIN</span>
-            <select
-              className={styles.skinSelect}
-              value={skin}
-              onChange={(e) => changeSkin(e.target.value as SkinId)}
-            >
-              {meta.skins.map((id) => (
-                <option key={id} value={id}>
-                  {SKIN_LABEL[id]}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
         <button
           type="button"
           className="btn yellow icon"
@@ -324,6 +313,22 @@ export function GamePlayer({ game }: { game: Game }) {
         <Link href={`/juegos/${game.id}`} className="btn ghost">
           SALIR
         </Link>
+        {meta && meta.skins.length > 1 && (
+          <label className={styles.skinField}>
+            <span className={styles.skinLabel}>SKIN</span>
+            <select
+              className={styles.skinSelect}
+              value={skin}
+              onChange={(e) => changeSkin(e.target.value as SkinId)}
+            >
+              {meta.skins.map((id) => (
+                <option key={id} value={id}>
+                  {SKIN_LABEL[id]}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
       </div>
 
       {over && (
@@ -514,38 +519,53 @@ function splitActions(actions: readonly GameAction[]) {
 type TouchPadProps = {
   actions: readonly GameAction[];
   onInput: (action: GameAction, down: boolean) => void;
+  /** Cargando, en pausa o con el modal de fin abierto: botones apagados. */
+  disabled: boolean;
 };
 
 /**
- * Mando superpuesto al canvas para dispositivos de puntero grueso. Cada botón
+ * Mando de los dispositivos de puntero grueso. Vive bajo el CRT, en su propio
+ * cuadro, para que ningún botón tape el área de juego. Cada botón
  * mantiene su acción mientras el dedo esté encima; `setInput` escribe en el
  * mismo mapa de teclas que el teclado, así que no hay un segundo camino de
  * input que probar.
+ *
+ * El bloque no desaparece cuando no se juega: se apaga. Así el CRT y la fila
+ * de servicio no dan un salto de doscientos píxeles cada vez que se pausa.
  */
-function TouchPad({ actions, onInput }: TouchPadProps) {
-  const renderButton = (action: GameAction, extraClass = "") => {
-    const face = ACTION_FACE[action];
-    const press = (down: boolean) => (e: ReactPointerEvent) => {
-      // Sin esto el navegador roba el gesto para desplazar o seleccionar.
-      e.preventDefault();
+function TouchPad({ actions, onInput, disabled }: TouchPadProps) {
+  /** Acciones con el dedo encima ahora mismo. */
+  const pressed = useRef<Set<GameAction>>(new Set());
+
+  // El navegador no garantiza un `pointerup` sobre un botón que acaba de
+  // volverse `disabled`: si no se soltase a mano, pausar con el dedo apoyado
+  // dejaría la tecla pegada y al reanudar el jugador se movería solo.
+  useEffect(() => {
+    if (!disabled) return;
+    for (const action of pressed.current) onInput(action, false);
+    pressed.current.clear();
+  }, [disabled, onInput]);
+
+  // Toda escritura al motor pasa por aquí, y de paso lleva la cuenta de lo que
+  // sigue pulsado. Va en `useCallback` para no tocar el `ref` desde el render.
+  const send = useCallback(
+    (action: GameAction, down: boolean) => {
+      if (down) pressed.current.add(action);
+      else pressed.current.delete(action);
       onInput(action, down);
-    };
-    return (
-      <button
-        key={action}
-        type="button"
-        aria-label={face.label}
-        className={`${styles.touchBtn} ${action === "fire" ? styles.touchFire : ""} ${extraClass}`}
-        onPointerDown={press(true)}
-        onPointerUp={press(false)}
-        onPointerCancel={press(false)}
-        onPointerLeave={press(false)}
-        onContextMenu={(e) => e.preventDefault()}
-      >
-        {face.glyph}
-      </button>
-    );
-  };
+    },
+    [onInput],
+  );
+
+  const renderButton = (action: GameAction, extraClass = "") => (
+    <TouchButton
+      key={action}
+      action={action}
+      extraClass={extraClass}
+      disabled={disabled}
+      onPress={send}
+    />
+  );
 
   const { dpad, acting } = splitActions(actions);
 
@@ -572,6 +592,41 @@ function TouchPad({ actions, onInput }: TouchPadProps) {
         {acting.map((action) => renderButton(action))}
       </div>
     </div>
+  );
+}
+
+/** Un botón del mando: mantiene su acción mientras el dedo esté encima. */
+function TouchButton({
+  action,
+  extraClass,
+  disabled,
+  onPress,
+}: {
+  action: GameAction;
+  extraClass: string;
+  disabled: boolean;
+  onPress: (action: GameAction, down: boolean) => void;
+}) {
+  const face = ACTION_FACE[action];
+  const press = (down: boolean) => (e: ReactPointerEvent) => {
+    // Sin esto el navegador roba el gesto para desplazar o seleccionar.
+    e.preventDefault();
+    onPress(action, down);
+  };
+  return (
+    <button
+      type="button"
+      aria-label={face.label}
+      disabled={disabled}
+      className={`${styles.touchBtn} ${action === "fire" ? styles.touchFire : ""} ${extraClass}`}
+      onPointerDown={press(true)}
+      onPointerUp={press(false)}
+      onPointerCancel={press(false)}
+      onPointerLeave={press(false)}
+      onContextMenu={(e) => e.preventDefault()}
+    >
+      {face.glyph}
+    </button>
   );
 }
 
