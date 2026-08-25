@@ -31,12 +31,12 @@ npm run format:check # prettier --check .
 - `lib/scores-db.ts` — ranking desde la vista `hall_of_fame`.
 - `proxy.ts` — refresco de la cookie de sesión (en Next 16 el Middleware se llama **Proxy**; la doc de `@supabase/ssr` sigue diciendo `middleware.ts`).
 - `supabase/migrations/` — esquema versionado (`profiles`, `scores`, vista `hall_of_fame`, RLS).
-- `specs/` — specs numeradas 01–08, con su estado en la cabecera.
+- `specs/` — specs numeradas 01–12, con su estado en la cabecera.
 - `references/` — prototipo original y `started-games/` (juegos sueltos pendientes de portar).
 
 ## Motores de juego
 
-Todo juego implementa el contrato `GameEngine` de `lib/engines/types.ts` y se registra en `lib/engines/index.ts` con **carga diferida** (`import()`), para que ningún motor viaje en el bundle de otras rutas. Motores actuales: `asteroides`, `caida` (Tetris), `arkanoid`, `serpentina`.
+Todo juego implementa el contrato `GameEngine` de `lib/engines/types.ts` y se registra en `lib/engines/index.ts` con **carga diferida** (`import()`), para que ningún motor viaje en el bundle de otras rutas. Motores actuales: `asteroides`, `caida` (Tetris), `arkanoid`, `serpentina`, `ranaria`.
 
 Invariantes del contrato (están comentados en `types.ts`, respetarlos):
 
@@ -82,10 +82,10 @@ Ampliar `GameAction` obliga a tocar también `ACTION_FACE` y `STEERING` en `comp
 
 ## Agentes
 
-- `game-planner` — subagente propio del repo (`.claude/agents/game-planner.md`). Decide **qué** juego añadir: analiza el catálogo, los motores y el contrato `GameEngine`, y propone candidatos razonados. Mantiene su memoria de sugerencias (y de descartes) en `references/SUGERENCIAS_JUEGOS.MD`, el único fichero que escribe. Va antes de `/integrar-juego`; no escribe specs ni código.
-- `game-jam` — subagente propio del repo (`.claude/agents/game-jam.md`). Dado un **tema**, elige tres juegos que encajen en el contrato `GameEngine` y escribe seis specs en Borrador: dos variantes rivales por juego, en `specs/game-jam/<game-id>/`. Trabaja de un tirón, sin preguntar; el humano revisa al final y se queda con una variante por juego. No implementa código.
-- `skin-designer` — subagente propio del repo (`.claude/agents/skin-designer.md`). Dado **un juego** con motor registrado, garantiza que tenga al menos tres skins: `clasico` (la paleta actual, por defecto), `retro` y `neon`. Audita primero y solo implementa lo que falte, incluido el mecanismo transversal: `SkinId`, `GameEngine.skins` y `GameHandle.setSkin` en `lib/engines/types.ts`, más el selector en `components/game-player.tsx` con persistencia en `localStorage`. Es el único agente que escribe código; regla dura: una skin solo cambia colores y dibujado, nunca geometría, hitboxes, tiempos ni puntuación. Mantiene su memoria en `references/GAMES_WITH_THEMES.MD`, el único `.md` que escribe.
-- `mobile-porter` — subagente propio del repo (`.claude/agents/mobile-porter.md`). Revisa que el sitio se vea bien en el navegador del móvil: abre las pantallas en un Chrome real a 375×667, aplica una checklist fija (desborde horizontal, zona táctil de 44 px, auto-zoom de iOS por `font-size < 16px`, tablas, `100vh`, safe areas, legibilidad, breakpoints, `:hover`) y deja el arreglo escrito como spec numerada en **Borrador**. Sin argumento revisa la home y las rutas del header; con un `id` de juego revisa su detalle y su reproductor. Toma la SPEC 10 como patrón. **No implementa código**: sus únicas escrituras son la spec y su memoria en `references/MOBILE_AUDIT.MD`. Aquí no hay app nativa ni PWA, así que no toca manifest ni service worker.
+- **`game-planner`** (`.claude/agents/game-planner.md`) — Decide qué juego añadir: analiza catálogo, motores y contrato `GameEngine`, y propone candidatos razonados; memoria en `references/SUGERENCIAS_JUEGOS.MD`. Va antes de `/integrar-juego`; no escribe specs ni código.
+- **`game-jam`** (`.claude/agents/game-jam.md`) — Dado un tema, elige tres juegos que encajen en `GameEngine` y escribe dos specs rivales por juego en `specs/game-jam/<game-id>/`, sin preguntar. No implementa código ni toca el catálogo.
+- **`skin-designer`** (`.claude/agents/skin-designer.md`) — Garantiza que un juego dado tenga al menos tres skins (`clasico`, `retro`, `neon`), incluido el mecanismo transversal en `lib/engines/types.ts` y el selector en `components/game-player.tsx`; memoria en `references/GAMES_WITH_THEMES.MD`. Único agente que escribe código; regla dura: una skin solo cambia colores y dibujado, nunca jugabilidad ni puntuación.
+- **`mobile-porter`** (`.claude/agents/mobile-porter.md`) — Audita el sitio en un Chrome real a tamaño móvil (checklist fija de responsive) y deja el arreglo como spec numerada en Borrador; memoria en `references/MOBILE_AUDIT.MD`. Sin argumento revisa home y header; con un `id` de juego, su detalle y reproductor. No implementa código.
 
 ## Flujo de trabajo
 
