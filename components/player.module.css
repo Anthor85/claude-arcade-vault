@@ -46,6 +46,7 @@
    representa algo que la mano toca. */
 
 .panel {
+  grid-area: panel;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -106,6 +107,14 @@
   text-shadow: 0 0 6px rgba(245, 255, 0, 0.45);
 }
 
+/* Donde no hay teclado, la serigrafía de teclas no dice nada: su sitio bajo el
+   CRT lo ocupa el mando. El marcado se queda para quien conecte uno. */
+@media (pointer: coarse) {
+  .panel {
+    display: none;
+  }
+}
+
 @media (max-width: 640px) {
   .panelItem {
     flex: 1 1 50%;
@@ -121,34 +130,29 @@
 /* ── Mando táctil ────────────────────────────────────────────────────────────
    Solo en dispositivos de puntero grueso: un portátil con pantalla táctil
    sigue jugando con teclado, y una ventana estrecha en escritorio no necesita
-   botones que no se pueden pulsar. Reparto de máquina real: dirección a la
-   izquierda, acción a la derecha. */
+   botones que no se pueden pulsar. Ya no se superpone al canvas: vive bajo el
+   CRT, en su propio cuadro, con el mismo aspecto de plancha que el bisel de la
+   leyenda al que sustituye. Reparto de máquina real: dirección a la izquierda,
+   acción a la derecha. */
 
 .touchPad {
+  grid-area: pad;
   display: none;
 }
 
 @media (pointer: coarse) {
   .touchPad {
     display: flex;
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    align-items: flex-end;
-    gap: 12px;
-    padding: 16px;
-    /* La plancha no intercepta nada: solo los botones. */
-    pointer-events: none;
-    z-index: 4;
+    align-items: center;
+    justify-content: center;
+    /* Separación cruceta ↔ acciones: fija, no la mitad de la pantalla. */
+    gap: 17px;
+    margin-top: 10px;
+    padding: 11px;
+    border: 1px solid var(--line-2);
+    border-top-color: rgba(255, 255, 255, 0.12);
+    background: linear-gradient(180deg, var(--bg-2), var(--bg));
   }
-}
-
-/* Cruceta a la izquierda y acciones a la derecha, cada grupo centrado en su
-   mitad de la franja: el pulgar de cada mano cae sobre el suyo. */
-.touchDpad,
-.touchActions {
-  flex: 1;
 }
 
 /* Rejilla 3×3 con el centro vacío. Las direcciones que el motor no declara
@@ -159,7 +163,7 @@
     ".    up    .    "
     "left .     right"
     ".    down  .    ";
-  gap: 8px;
+  gap: 4px;
   justify-content: center;
 }
 
@@ -181,40 +185,43 @@
 
 /* Hueco de una dirección que este juego no usa: ocupa sitio y nada más. */
 .touchSlot {
-  width: 60px;
-  height: 60px;
+  width: 42px;
+  height: 42px;
 }
 
 .touchActions {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .touchBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 60px;
-  height: 60px;
+  width: 42px;
+  height: 42px;
   padding: 0;
   border: 1px solid var(--line);
   border-radius: 50%;
   background: rgba(10, 10, 15, 0.55);
   color: var(--cyan);
   font-family: var(--pixel);
-  font-size: 14px;
+  font-size: 10px;
   line-height: 1;
-  /* Solo los botones interceptan: la franja y los huecos dejan ver y tocar
-     el canvas que hay debajo. */
-  pointer-events: auto;
   /* Que el dedo no arrastre la página al mantener pulsado. */
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
     0 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* Mando apagado: sigue ocupando su sitio, pero se ve que no responde. */
+.touchBtn:disabled {
+  opacity: 0.35;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .touchBtn:active {
