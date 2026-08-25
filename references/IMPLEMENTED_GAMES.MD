@@ -3,7 +3,7 @@
 Estado del catálogo de Arcade Vault. "Jugable" = tiene motor real registrado en
 `lib/engines/index.ts`; el resto usa la maqueta del reproductor.
 
-## Jugables (4)
+## Jugables (5)
 
 | Juego | `id` | Motor | Categoría | Spec |
 | --- | --- | --- | --- | --- |
@@ -11,8 +11,9 @@ Estado del catálogo de Arcade Vault. "Jugable" = tiene motor real registrado en
 | CAÍDA (Tetris) | `caida` | `lib/engines/tetris.ts` | PUZZLE | [06](../specs/06-caida-jugable.md) |
 | ARKANOID | `arkanoid` | `lib/engines/arkanoid.ts` | ARCADE | [07](../specs/07-arkanoid-jugable.md) |
 | SERPENTINA | `serpentina` | `lib/engines/serpentina.ts` | ARCADE | [08](../specs/08-serpentina-jugable.md) |
+| RANARIA (Frogger) | `ranaria` | `lib/engines/ranaria.ts` | ARCADE | [11](../specs/11-ranaria-jugable.md) |
 
-## Pendientes de motor (5)
+## Pendientes de motor (4)
 
 Están en el catálogo (`lib/games.ts`) con ficha y portada, pero sin motor.
 
@@ -21,7 +22,6 @@ Están en el catálogo (`lib/games.ts`) con ficha y portada, pero sin motor.
 | BLOQUE BUSTER | `bloque-buster` | ARCADE | — |
 | GLOTÓN | `gloton` | ARCADE | — |
 | INVASORES | `invasores` | SHOOTER | — |
-| RANARIA | `ranaria` | ARCADE | — |
 | DUELO PIXEL | `duelo-pixel` | VERSUS | — |
 
 ## Prototipos sin portar

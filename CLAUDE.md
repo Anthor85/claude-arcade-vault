@@ -77,7 +77,7 @@ Ampliar `GameAction` obliga a tocar también `ACTION_FACE` y `STEERING` en `comp
 
 - `/frontend-design` — usar siempre para diseñar interfaces de usuario.
 - `/integrar-juego` — skill propia del repo (`.claude/skills/integrar-juego/`). Escribe la spec para integrar un juego nuevo sobre el contrato `GameEngine`, partiendo de una carpeta de `references/started-games/` o de una descripción. No implementa código. Su `plataforma.md` es el mapa de puntos de integración y el catálogo de criterios de aceptación.
-- `/spec-impl-game` — skill propia del repo (`.claude/skills/spec-impl-game/`). Implementa una spec de juego aprobada con `/spec-impl` y encadena después los subagentes `skin-designer` y `mobile-porter`, en ese orden, con pausa antes de cada uno.
+- `/spec-impl-game` — skill propia del repo (`.claude/skills/spec-impl-game/`). Implementa una spec de juego aprobada —lleva dentro la lógica de `/spec-impl`, no la invoca— y encadena después los subagentes `skin-designer` y `mobile-porter`, en ese orden, con pausa antes de cada uno.
 - `/spec` y `/spec-impl` — de `Klerith/fernando-skills` (`npx skills@latest add Klerith/fernando-skills`).
 
 ## Agentes
