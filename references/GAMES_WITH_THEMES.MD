@@ -14,6 +14,7 @@ Skins obligatorias en todo juego jugable: `clasico` (la paleta original, por def
 | CAÍDA | `lib/engines/tetris.ts` | — | — | — | 2026-08-24 | Solo contrato propagado (`skins: ["clasico"]`, `setSkin` vacío). Ojo: el comentario de `COLORS` dice que esa paleta **era la skin `retro` del original**; al tematizarlo, esa paleta pasa a `clasico` y la `retro` nueva debe ser visiblemente distinta. |
 | ARKANOID | `lib/engines/arkanoid.ts` | ✅ | ✅ | ✅ | 2026-08-24 | `SKINS: Record<SkinId, ArkanoidSkin>`. El color vive en el PNG: se tiñe la lámina entera **una vez por skin** (`tintSheet` + `tintRegion`, `saturation` → `multiply` → `destination-in`) y se cachea en un `Map<SkinId, SkinAssets>`. El halo de `neon` va horneado en mosaicos por color (`buildGlowTiles`), así que en el frame el bloque es un `drawImage` sin `shadow*`. `POWERUPS` conserva `letter` y `chance`; sus colores se movieron a `skin.powerup`. |
 | SERPENTINA | `lib/engines/serpentina.ts` | ✅ | ✅ | ✅ | 2026-08-24 | Las cinco constantes de color desaparecieron: ahora son `SKINS: Record<SkinId, SerpentinaSkin>`. Extra no previsto: la fruta viene de un PNG (`serpentina-sprites.ts`), así que `retro` la tiñe en un lienzo offscreen con `globalCompositeOperation = "source-in"`, cacheado por especie+color (se re-tiñe solo al comer, nunca por frame). |
+| RANARIA | `lib/engines/ranaria.ts` | ✅ | ✅ | ✅ | 2026-08-25 | El motor ya nacía con `SKINS: Record<SkinId, RanariaSkin>` y `setSkin` reales (SPEC 11), pero `retro` y `neon` apuntaban a la clásica y declaraba `skins: ["clasico"]`. Se escribieron las dos paletas y se añadieron dos campos al tipo: `rejilla` y `glow`. Sin sprites: todo son primitivas de canvas. |
 
 ## Mecanismo transversal
 
@@ -34,8 +35,8 @@ Skins obligatorias en todo juego jugable: `clasico` (la paleta original, por def
 - Persistencia: `localStorage`, clave `arcade-vault:skin:<gameId>`, leída con guarda
   (`typeof window === "undefined"` + `try/catch`) y reaplicada tras `onReady`.
 - Estilo: `.skinField` / `.skinLabel` / `.skinSelect` en `components/player.module.css`.
-- Los tres motores no tematizados declaran `skins: ["clasico"]` y un `setSkin` vacío.
-  Es lo mínimo para que compilen tras la ampliación aditiva del contrato.
+- A 2026-08-25 el único motor sin tematizar es `caida`, que declara `skins: ["clasico"]`
+  y un `setSkin` vacío: lo mínimo para compilar tras la ampliación aditiva del contrato.
 
 ## Decisiones de paleta
 
@@ -132,3 +133,43 @@ Rejilla `rgba(0, 245, 255, 0.08)` cada 40 px, puramente decorativa. El halo
 color (`buildGlowTiles`, `GLOW_PAD = 6` px de margen solo visual), así que los hasta 60
 bloques del tablero son 60 `drawImage` limpios. Solo barra, bolas y cápsulas —cuatro o
 cinco objetos— llevan `shadow*` en vivo.
+
+### RANARIA · `clasico`
+
+La paleta con la que nació el motor, byte a byte: orilla `#123d1f`, río `#06203f`, mediana
+`#1c5c2b` (verde más claro para que la franja de descanso se lea sola), asfalto `#111111`,
+línea de carril `#e8e8e8`, coches `#ffd400` y camiones `#ff5c3a`, troncos `#7a4a1e` con
+veta `#4a2b10`, tortugas `#2fbf71` / caparazón `#166b3c` / hundida `#0b3a5c`, rana
+`#8bff3a` y nenúfares `#1f7a3a` con borde `#8bff6a`. Cronómetro semáforo: `#39ff88` →
+`#ffc23a` → `#ff3a3a`. Verde lima sobre asfalto negro, en línea con el color `green` de la
+ficha del catálogo. `glow: 0`, `rejilla: null`: abrir el juego sin elegir nada se ve
+exactamente igual que antes de existir el selector.
+
+### RANARIA · `retro`
+
+Fósforo ámbar de CRT con el mismo tono de referencia que las `retro` de Asteroides,
+Serpentina y Arkanoid (`#ffb000`), para que las cuatro pantallas ámbar del arcade hablen
+igual. Un solo matiz y la lectura la da la luminosidad: río `#0d0a04` (lo más oscuro de la
+pantalla, y el agua es lo que mata), asfalto `#1a1204`, orilla `#2a1d06`, mediana
+`#4a3208`. Vehículos en el ámbar de referencia (`#ffb000` coche, `#ffd28a` camión), troncos
+`#c98a00` con veta `#7a5200`, tortugas `#ffb000` y hundidas `#4a3208` —casi fondo, que es
+justo la señal de que ya no dan apoyo—. La rana es `#ffe9c4`, lo más brillante de la
+pantalla, porque es lo que hay que seguir con la vista. Decisión propia: el cronómetro se
+invierte respecto al color —en monocromo no existe el rojo de alarma—, así que va de
+apagado (`#c98a00`) a casi blanco (`#ffe9c4`) según se agota. `glow: 0` y sin rejilla.
+
+### RANARIA · `neon`
+
+Tokens del tema arcade de `app/globals.css` sobre fondos casi negros: río `#040a1c`,
+asfalto `#04040c`, orilla `#06120a`, mediana `#0a2a16`. Rana `--green #00ff88`, y el borde
+del nenúfar en ese mismo verde: el destino habla el color de la rana. Coches `--yellow
+#f5ff00`, camiones `--magenta #ff006e`, tortugas `--cyan #00f5ff` y troncos `#b026ff`
+violeta —el único color fuera de los tokens, necesario para que tronco y tortuga no se
+confundan dentro del río—. La tortuga hundida es `#0a1630`, azul de agua. Rejilla
+`rgba(0, 245, 255, 0.08)` con el paso de celda que ya existía (40 px): decorativa, no marca
+ninguna casilla nueva. El halo es `shadowBlur: 8` vía `applyGlow()`, **una vez por
+elemento** y siempre dentro de `save()`/`restore()`, y solo en rana, borde de nenúfar,
+vehículos y barra de cronómetro: troncos y tortugas van sin halo porque son las entidades
+más numerosas (una tortuga son 2-3 círculos por entidad) y su sombra costaría fps sin
+aportar lectura. Los ojos de la rana se pintan tras el `restore()`: son oscuros y su sombra
+ensuciaba la cara.

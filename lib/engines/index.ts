@@ -14,6 +14,7 @@ const ENGINES: Record<string, EngineLoader> = {
   caida: () => import("./tetris").then((m) => m.tetrisEngine),
   arkanoid: () => import("./arkanoid").then((m) => m.arkanoidEngine),
   serpentina: () => import("./serpentina").then((m) => m.serpentinaEngine),
+  ranaria: () => import("./ranaria").then((m) => m.ranariaEngine),
 };
 
 /** ¿Este juego tiene un motor real, o toca maqueta? */
