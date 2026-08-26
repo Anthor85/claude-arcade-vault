@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { HomeSilhouettes } from "@/components/home-silhouettes";
 import { MiniCard } from "@/components/mini-card";
+import { PokemonCounter } from "@/components/pokemon-counter";
 import { Reveal } from "@/components/reveal";
 import styles from "@/components/home.module.css";
 import { GAMES } from "@/lib/games";
@@ -8,6 +9,7 @@ import { GAMES } from "@/lib/games";
 export default function Home() {
   return (
     <div className={`${styles.home} fade-in`}>
+      <PokemonCounter />
       {/* HERO */}
       <section className={styles.homeHero}>
         <HomeSilhouettes />
