@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
@@ -128,6 +129,29 @@ export async function signUp(
 
   revalidatePath("/", "layout");
   redirect("/");
+}
+
+/** Origen de la petición actual, para armar la `redirectTo` del callback OAuth. */
+async function origin(): Promise<string> {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host")!;
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  return `${proto}://${host}`;
+}
+
+/** Inicia el flujo OAuth con Google o GitHub y redirige al proveedor. */
+export async function signInWithOAuth(provider: "google" | "github") {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: { redirectTo: `${await origin()}/auth/callback` },
+  });
+
+  if (error || !data.url) {
+    redirect("/acceso?error=oauth");
+  }
+
+  redirect(data.url);
 }
 
 /** Los errores de Supabase vienen en inglés; los habituales se traducen. */

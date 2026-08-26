@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 
-import { signIn, signUp, type AuthState } from "@/app/acceso/actions";
+import {
+  signIn,
+  signInWithOAuth,
+  signUp,
+  type AuthState,
+} from "@/app/acceso/actions";
 import styles from "@/components/auth.module.css";
 
 type Tab = "in" | "up";
@@ -152,22 +157,22 @@ export function AuthForm() {
 
         <div className="auth-divider">O CONTINÚA CON</div>
         <div className="social">
-          <button
-            className="btn ghost"
-            type="button"
-            disabled
-            title="Próximamente"
+          <form
+            action={() => signInWithOAuth("google")}
+            style={{ display: "contents" }}
           >
-            ◆&nbsp;&nbsp;GOOGLE
-          </button>
-          <button
-            className="btn ghost"
-            type="button"
-            disabled
-            title="Próximamente"
+            <button className="btn ghost" type="submit" disabled={pending}>
+              ◆&nbsp;&nbsp;GOOGLE
+            </button>
+          </form>
+          <form
+            action={() => signInWithOAuth("github")}
+            style={{ display: "contents" }}
           >
-            ▣&nbsp;&nbsp;GITHUB
-          </button>
+            <button className="btn ghost" type="submit" disabled={pending}>
+              ▣&nbsp;&nbsp;GITHUB
+            </button>
+          </form>
         </div>
 
         <div
