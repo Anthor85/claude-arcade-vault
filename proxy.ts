@@ -43,9 +43,15 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Un jugador ya autenticado no necesita ver la pantalla de acceso: se le
-  // devuelve a la home. Punto de partida para futuras rutas que exijan sesión.
+  // devuelve a la home.
   if (user && request.nextUrl.pathname === "/acceso") {
     return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  // Jugar requiere sesión: el resto del sitio (biblioteca, detalle, salón) es
+  // público. La autorización real la hacen las políticas RLS; esto es solo UX.
+  if (!user && /^\/juegos\/[^/]+\/jugar$/.test(request.nextUrl.pathname)) {
+    return NextResponse.redirect(new URL("/acceso", request.url));
   }
 
   return response;
