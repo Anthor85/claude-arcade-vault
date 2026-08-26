@@ -86,6 +86,7 @@ Ampliar `GameAction` obliga a tocar también `ACTION_FACE` y `STEERING` en `comp
 - **`game-jam`** (`.claude/agents/game-jam.md`) — Dado un tema, elige tres juegos que encajen en `GameEngine` y escribe dos specs rivales por juego en `specs/game-jam/<game-id>/`, sin preguntar. No implementa código ni toca el catálogo.
 - **`skin-designer`** (`.claude/agents/skin-designer.md`) — Garantiza que un juego dado tenga al menos tres skins (`clasico`, `retro`, `neon`), incluido el mecanismo transversal en `lib/engines/types.ts` y el selector en `components/game-player.tsx`; memoria en `references/GAMES_WITH_THEMES.MD`. Único agente que escribe código; regla dura: una skin solo cambia colores y dibujado, nunca jugabilidad ni puntuación.
 - **`mobile-porter`** (`.claude/agents/mobile-porter.md`) — Audita el sitio en un Chrome real a tamaño móvil (checklist fija de responsive) y deja el arreglo como spec numerada en Borrador; memoria en `references/MOBILE_AUDIT.MD`. Sin argumento revisa home y header; con un `id` de juego, su detalle y reproductor. No implementa código.
+- **`security-guardian`** (`.claude/agents/security-guardian.md`) — Audita bajo demanda la seguridad de la app y de Supabase (headers, RLS, contraseñas, advisors) contra SPEC 13/15 y el checklist externo; memoria en `references/SECURITY_AUDIT.MD`. Solo lectura: no edita código ni aplica migraciones.
 
 ## Flujo de trabajo
 
