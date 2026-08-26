@@ -123,6 +123,12 @@ export function AuthForm() {
               disabled={pending}
               aria-invalid={error?.field === "pass" || undefined}
             />
+            {isSignUp && (
+              <p className={styles.fieldHint}>
+                MÍNIMO 8 CARACTERES, CON MAYÚSCULAS, MINÚSCULAS, NÚMEROS Y
+                SÍMBOLOS.
+              </p>
+            )}
           </div>
 
           {error && (

@@ -38,7 +38,15 @@ export async function proxy(request: NextRequest) {
   });
 
   // No quitar: es la llamada que dispara el refresco del token.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Un jugador ya autenticado no necesita ver la pantalla de acceso: se le
+  // devuelve a la home. Punto de partida para futuras rutas que exijan sesión.
+  if (user && request.nextUrl.pathname === "/acceso") {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
 
   return response;
 }

@@ -1,6 +1,6 @@
 # SPEC 15 — Checklist de seguridad básico
 
-> **Estado:** Aprobada
+> **Estado:** Implementada
 > **Depende de:** SPEC 04
 > **Fecha:** 2026-08-26
 > **Objetivo:** Aplicar el checklist de seguridad básico de `references/security/security-checklist.md`: headers de seguridad en Next.js, una regex de complejidad de contraseña (minúsculas + mayúsculas + dígitos + símbolos) en el formulario de registro, y los ajustes del panel de Supabase sobre contraseñas y límite de registros, dejando constancia de que RLS ya está activo en `profiles` y `scores`.
