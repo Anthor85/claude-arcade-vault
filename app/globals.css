@@ -314,6 +314,40 @@ a {
   display: none;
 }
 
+/* Avatar+nombre: decorativo, no clicable. Comparte clases con el panel móvil. */
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  flex: 0 0 auto;
+}
+.user-avatar-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-2);
+  color: var(--cyan);
+}
+.user-avatar-fallback svg {
+  width: 16px;
+  height: 16px;
+}
+.user-name {
+  font-family: var(--pixel);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+.av-nav .nav-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 16px;
+}
+
 @media (max-width: 840px) {
   .av-nav {
     padding: 12px 16px;
@@ -337,8 +371,8 @@ a {
   .av-nav .logo-text {
     white-space: nowrap;
   }
-  /* El botón de sesión es lo único que cede: se recorta con puntos suspensivos
-     para que un nombre de 10 caracteres no desborde el nav a 375 px. */
+  /* Sin sesión, "Iniciar Sesión" se recorta con puntos suspensivos para que
+     no desborde el nav a 375 px. */
   .av-nav .auth-btn {
     margin-left: 0;
     min-width: 0;
@@ -350,6 +384,17 @@ a {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  /* Con sesión iniciada, el panel del hamburguesa ya trae "Cerrar Sesión" y
+     el nombre: en la barra solo queda el avatar. */
+  .av-nav .nav-signout {
+    display: none;
+  }
+  .av-nav .nav-user {
+    margin-left: 0;
+  }
+  .av-nav .nav-user .user-name {
+    display: none;
   }
 }
 
@@ -396,6 +441,18 @@ a {
 .av-mobile-panel .mobile-signout:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+.av-mobile-panel .mobile-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px 14px;
+  border-bottom: 1px dashed var(--line-2);
+  margin-bottom: 4px;
+}
+.av-mobile-panel .mobile-user .user-name {
+  font-size: 11px;
+  color: var(--ink);
 }
 .av-mobile-backdrop {
   position: fixed;

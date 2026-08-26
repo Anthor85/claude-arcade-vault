@@ -12,8 +12,12 @@ import {
 
 import { createClient } from "@/lib/supabase/client";
 
-/** El jugador tal y como lo necesita la interfaz: identidad y nick. */
-export type SessionUser = { id: string; username: string };
+/** El jugador tal y como lo necesita la interfaz: identidad, nick y avatar. */
+export type SessionUser = {
+  id: string;
+  username: string;
+  avatarUrl: string | null;
+};
 
 type SessionValue = {
   user: SessionUser | null;

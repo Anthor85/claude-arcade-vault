@@ -3,7 +3,49 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { useSession } from "@/components/session-provider";
+import { useSession, type SessionUser } from "@/components/session-provider";
+
+/** Icono de recambio cuando el jugador no trae foto (login por email+contraseña). */
+function GenericAvatarIcon() {
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <g fill="currentColor">
+        <rect x="6" y="1" width="4" height="2" />
+        <rect x="7" y="3" width="2" height="4" />
+        <rect x="4" y="7" width="8" height="2" />
+        <rect x="3" y="9" width="2" height="2" />
+        <rect x="11" y="9" width="2" height="2" />
+        <rect x="5" y="11" width="6" height="2" />
+        <rect x="6" y="13" width="4" height="2" />
+      </g>
+    </svg>
+  );
+}
+
+/**
+ * Bloque decorativo avatar+nombre, no clicable. Se reutiliza tal cual en la
+ * vista web y en el panel móvil: mismo dato, misma regla de fallback.
+ */
+function UserBadge({
+  user,
+  className,
+}: {
+  user: SessionUser;
+  className: string;
+}) {
+  return (
+    <div className={className}>
+      {user.avatarUrl ? (
+        <img src={user.avatarUrl} alt="" className="user-avatar" />
+      ) : (
+        <span className="user-avatar user-avatar-fallback">
+          <GenericAvatarIcon />
+        </span>
+      )}
+      <span className="user-name">{user.username}</span>
+    </div>
+  );
+}
 
 export function Nav() {
   const pathname = usePathname();
@@ -75,15 +117,17 @@ export function Nav() {
         </div>
 
         {user ? (
-          <button
-            type="button"
-            className="btn ghost auth-btn"
-            onClick={leave}
-            disabled={leaving}
-            title="Cerrar sesión"
-          >
-            {user.username} ▾
-          </button>
+          <>
+            <UserBadge user={user} className="nav-user" />
+            <button
+              type="button"
+              className="btn ghost auth-btn nav-signout"
+              onClick={leave}
+              disabled={leaving}
+            >
+              Cerrar Sesión
+            </button>
+          </>
         ) : (
           <Link href="/acceso" className="btn auth-btn" onClick={close}>
             Iniciar Sesión
@@ -135,14 +179,17 @@ export function Nav() {
           Acerca de
         </Link>
         {user ? (
-          <button
-            type="button"
-            className="mobile-signout"
-            onClick={leave}
-            disabled={leaving}
-          >
-            Cerrar Sesión ({user.username})
-          </button>
+          <>
+            <UserBadge user={user} className="mobile-user" />
+            <button
+              type="button"
+              className="mobile-signout"
+              onClick={leave}
+              disabled={leaving}
+            >
+              Cerrar Sesión
+            </button>
+          </>
         ) : (
           <Link
             href="/acceso"
