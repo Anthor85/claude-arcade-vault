@@ -1,6 +1,6 @@
 # SPEC 14 — Avatar y nombre en el nav
 
-> **Estado:** Aprobada
+> **Estado:** Implementada
 > **Depende de:** SPEC 04, SPEC 13
 > **Fecha:** 2026-08-26
 > **Objetivo:** Mostrar avatar + nombre del jugador a la izquierda del botón de sesión en la vista web (que pasa a decir "Cerrar Sesión"), y en móvil separar ese mismo bloque avatar+nombre del item de menú "Cerrar Sesión".
