@@ -25,5 +25,8 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   // Sin perfil no hay nada que mostrar en el nav ni a quién atribuir marcas.
   if (!profile) return null;
 
-  return { id: user.id, username: profile.username };
+  const avatarUrl =
+    (user.user_metadata?.avatar_url as string | undefined) ?? null;
+
+  return { id: user.id, username: profile.username, avatarUrl };
 }
