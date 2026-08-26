@@ -15,6 +15,9 @@ export type AuthState =
 /** Misma regla que el `check` de `public.profiles`. */
 const USERNAME_RE = /^[A-Z0-9_]{3,10}$/;
 
+/** Exige minúscula, mayúscula, dígito y símbolo; solo se aplica en `signUp`. */
+const PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+
 const NICK_OCUPADO = "EL NOMBRE DE JUGADOR YA ESTÁ OCUPADO.";
 
 function read(formData: FormData, key: string): string {
@@ -91,6 +94,14 @@ export async function signUp(
       status: "error",
       message: "LA CONTRASEÑA ES OBLIGATORIA.",
       field: "pass",
+    };
+  }
+  if (!PASSWORD_RE.test(password)) {
+    return {
+      status: "error",
+      field: "pass",
+      message:
+        "LA CONTRASEÑA DEBE TENER MAYÚSCULAS, MINÚSCULAS, NÚMEROS Y SÍMBOLOS.",
     };
   }
 
